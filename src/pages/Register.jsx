@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock, User, Briefcase } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Register = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -17,7 +17,7 @@ const Register = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/register', formData);
+      const { data } = await api.post('/api/auth/register', formData);
       localStorage.setItem('userInfo', JSON.stringify(data));
       navigate('/dashboard');
     } catch (err) {

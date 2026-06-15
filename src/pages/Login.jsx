@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, Mail, Lock } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
-import axios from 'axios';
+import api from '../utils/api';
 import FaceLoginVerify from '../components/FaceLoginVerify';
 
 const Login = () => {
@@ -21,7 +21,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const { data } = await axios.post('/api/auth/login', { email, password });
+      const { data } = await api.post('/api/auth/login', { email, password });
       if (data.role === 'Admin') {
         localStorage.setItem('userInfo', JSON.stringify(data));
         navigate('/dashboard');
