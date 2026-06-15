@@ -18,21 +18,21 @@ const StatCard = ({ title, value, increase, icon: Icon, delay }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay }}
-    className="glass-card p-6 relative overflow-hidden group hover:border-[var(--color-accent)]/50 transition-colors"
+    className="glass-card p-4 sm:p-6 relative overflow-hidden group hover:border-[var(--color-accent)]/50 transition-colors"
   >
     <div className="absolute -right-6 -top-6 w-24 h-24 bg-[var(--color-accent)]/10 rounded-full blur-2xl group-hover:bg-[var(--color-accent)]/20 transition-all"></div>
-    <div className="flex justify-between items-start mb-4">
+    <div className="flex justify-between items-start mb-3">
       <div>
-        <p className="text-[var(--color-text-secondary)] text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-3xl font-bold text-white">{value}</h3>
+        <p className="text-[var(--color-text-secondary)] text-xs sm:text-sm font-medium mb-1">{title}</p>
+        <h3 className="text-2xl sm:text-3xl font-bold text-white">{value}</h3>
       </div>
-      <div className="p-3 rounded-xl bg-white/5 text-[var(--color-accent)] group-hover:scale-110 transition-transform">
-        <Icon className="w-6 h-6" />
+      <div className="p-2 sm:p-3 rounded-xl bg-white/5 text-[var(--color-accent)] group-hover:scale-110 transition-transform">
+        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
       </div>
     </div>
-    <div className="flex items-center text-sm">
+    <div className="flex items-center text-xs sm:text-sm">
       <span className="flex items-center text-[var(--color-accent)] font-medium">
-        <ArrowUpRight className="w-4 h-4 mr-1" />
+        <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
         {increase}
       </span>
       <span className="text-[var(--color-text-secondary)] ml-2">vs last month</span>
@@ -163,25 +163,23 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-end">
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">Dashboard Overview</h1>
+          <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Dashboard Overview</h1>
           <p className="text-[var(--color-text-secondary)] text-sm">{getRoleMessage()}</p>
         </div>
-        <div className="flex gap-2">
-           <button onClick={() => exportToExcel(recentActivities, 'Recent_Activities')} className="px-4 py-2 text-sm bg-white/5 text-white rounded-lg border border-[var(--color-border)] hover:bg-white/10 transition-colors">
-             Export to Excel
-           </button>
-        </div>
+        <button onClick={() => exportToExcel(recentActivities, 'Recent_Activities')} className="px-3 py-2 text-xs sm:text-sm bg-white/5 text-white rounded-lg border border-[var(--color-border)] hover:bg-white/10 transition-colors whitespace-nowrap">
+          Export to Excel
+        </button>
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
         {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Total Leads" value={stats.totalLeads} increase="12.5%" icon={Users} delay={0.1} />}
-        <StatCard title="Total Clients" value={stats.totalClients || 0} increase="4.8%" icon={Building} delay={0.15} />
+        {userRole !== 'Developer' && <StatCard title="Total Clients" value={stats.totalClients || 0} increase="4.8%" icon={Building} delay={0.15} />}
         <StatCard title="Active Projects" value={stats.totalProjects || 0} increase="10.2%" icon={FolderKanban} delay={0.2} />
-        <StatCard title="Sales Revenue" value={`$${stats.salesRevenue.toLocaleString()}`} increase="8.2%" icon={DollarSign} delay={0.25} />
-        <StatCard title="Employee Count" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />
+        {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${stats.salesRevenue.toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
+        {userRole === 'Admin' && <StatCard title="Employee Count" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
         <StatCard title="Pending Tasks" value={stats.pendingTasks} increase="18.3%" icon={CheckSquare} delay={0.35} />
       </div>
 
@@ -267,12 +265,12 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
-          className={`glass-card p-6 ${(userRole === 'Admin' || userRole === 'Marketing') ? 'lg:col-span-2' : 'lg:col-span-3'}`}
+          className={`glass-card p-4 sm:p-6 ${(userRole === 'Admin' || userRole === 'Marketing') ? 'lg:col-span-2' : 'lg:col-span-3'}`}
         >
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-white">Revenue & Leads</h3>
           </div>
-          <div className="h-72 w-full" style={{ minHeight: '288px' }}>
+          <div className="h-52 sm:h-72 w-full">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                 <defs>
@@ -305,7 +303,7 @@ const Dashboard = () => {
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-bold text-white">Lead Conversion</h3>
             </div>
-            <div className="h-72 w-full" style={{ minHeight: '288px' }}>
+            <div className="h-52 sm:h-72 w-full">
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={chartData} margin={{ top: 10, right: 0, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="var(--color-border)" vertical={false} />
@@ -330,29 +328,29 @@ const Dashboard = () => {
         transition={{ duration: 0.4, delay: 0.65 }}
         className="glass-card overflow-hidden mt-6"
       >
-        <div className="p-6 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-card-bg)]/80">
+        <div className="p-4 sm:p-6 border-b border-[var(--color-border)] flex justify-between items-center bg-[var(--color-card-bg)]/80">
           <div>
-            <h3 className="text-lg font-bold text-white">Sales Pipeline Management</h3>
-            <p className="text-sm text-[var(--color-text-secondary)]">Active deals and revenue forecasting</p>
+            <h3 className="text-base sm:text-lg font-bold text-white">Sales Pipeline</h3>
+            <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">Active deals and revenue forecasting</p>
           </div>
           {userRole === 'Admin' && (
-            <button onClick={() => { setIsEdit(false); setFormData({ client: '', amount: '', stage: 'Negotiation', probability: 50 }); setShowModal(true); }} className="flex items-center px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold rounded-lg transition-all shadow-[0_0_12px_rgba(20,184,166,0.35)]">
-              <Plus className="w-3.5 h-3.5 mr-1.5" /> Add Deal
+            <button onClick={() => { setIsEdit(false); setFormData({ client: '', amount: '', stage: 'Negotiation', probability: 50 }); setShowModal(true); }} className="flex items-center px-3 py-1.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold rounded-lg transition-all">
+              <Plus className="w-3.5 h-3.5 mr-1" /> Add Deal
             </button>
           )}
         </div>
         
         {salesDeals && salesDeals.length === 0 ? (
-          <div className="p-10 text-center text-[var(--color-text-secondary)]">No active deals found. Create one to begin forecasting.</div>
+          <div className="p-10 text-center text-[var(--color-text-secondary)]">No active deals found.</div>
         ) : (
-          <div className="p-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="p-4 sm:p-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             {salesDeals && salesDeals.map((deal) => (
               <div key={deal.id} className="bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-xl p-4 hover:border-[var(--color-accent)]/50 transition-colors relative group">
                 <div className="flex justify-between items-start mb-3">
                   <h4 className="font-bold text-white pr-6 truncate">{deal.client}</h4>
                   <span className="text-xs font-medium px-2 py-0.5 bg-white/5 rounded-md text-[var(--color-text-secondary)]">{deal.stage}</span>
                 </div>
-                <p className="text-xl font-bold text-[var(--color-accent)] mb-3">${deal.amount.toLocaleString()}</p>
+                <p className="text-xl font-bold text-[var(--color-accent)] mb-3">₹{deal.amount.toLocaleString('en-IN')}</p>
                 
                 {/* Probability Progress Bar */}
                 <div className="w-full bg-white/5 rounded-full h-1.5 mb-1">
@@ -386,8 +384,8 @@ const Dashboard = () => {
           <div className="p-6 border-b border-[var(--color-border)] flex justify-between items-center">
             <h3 className="text-lg font-bold text-white">Recent Leads</h3>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
+          <div className="overflow-x-auto -mx-1">
+            <table className="w-full text-left border-collapse min-w-[400px]">
               <thead>
                 <tr className="bg-white/5 text-[var(--color-text-secondary)] text-xs uppercase tracking-wider">
                   <th className="px-6 py-4 font-medium">Name</th>
@@ -438,7 +436,7 @@ const Dashboard = () => {
                   <input type="text" required value={formData.client} onChange={e => setFormData({...formData, client: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
                 </div>
                 <div>
-                  <label className="text-sm text-[var(--color-text-secondary)]">Deal Amount ($) *</label>
+                  <label className="text-sm text-[var(--color-text-secondary)]">Deal Amount (₹) *</label>
                   <input type="number" required value={formData.amount} onChange={e => setFormData({...formData, amount: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
                 </div>
                 <div>
