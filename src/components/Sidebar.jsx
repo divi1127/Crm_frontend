@@ -10,12 +10,13 @@ import {
   BarChart3,
   Settings,
   LogOut,
-  X,
   Building,
   FolderKanban,
   ClipboardList,
-  Shield
+  Shield,
+  Menu
 } from 'lucide-react';
+import jodLogo from '../assets/jod.jpeg';
 
 // Admin-only nav items
 const adminNavItems = [
@@ -29,6 +30,7 @@ const adminNavItems = [
   { path: '/follow-up',         label: 'Follow Up',         icon: CalendarClock },
   { path: '/work-update',       label: 'Work Update',       icon: ClipboardList },
   { path: '/attendance',        label: 'Attendance',        icon: CalendarCheck },
+  { path: '/history',           label: 'Sales History',     icon: BarChart3 },
   { path: '/reports',           label: 'Reports',           icon: BarChart3 },
   { path: '/settings',          label: 'Settings',          icon: Settings },
 ];
@@ -82,33 +84,21 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   return (
     <div 
       className={`fixed md:relative z-40 flex flex-col h-full bg-[var(--color-secondary-bg)] border-r border-[var(--color-border)] transition-all duration-300 ${
-        isOpen 
-          ? 'translate-x-0 w-64' 
-          : '-translate-x-full md:translate-x-0 w-0 md:w-20 overflow-hidden'
+        isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-16 w-0 overflow-hidden'
       }`}
     >
-      <div className="flex items-center justify-between p-4 h-16 border-b border-[var(--color-border)]">
+      {/* Header: logo + toggle button inside sidebar */}
+      <div className="flex items-center h-16 border-b border-[var(--color-border)] px-3 gap-2">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
         {isOpen && (
-          <div className="flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] flex items-center justify-center">
-                <span className="text-white font-bold text-lg">C</span>
-              </div>
-              <span className="text-white font-bold text-xl tracking-tight">CRM.io</span>
-            </div>
-            
-            {/* Close sidebar button visible on mobile when open */}
-            <button 
-              onClick={() => setIsOpen(false)}
-              className="p-1 md:hidden text-[var(--color-text-secondary)] hover:text-white rounded-lg hover:bg-white/5"
-            >
-              <X className="w-5 h-5" />
-            </button>
-          </div>
-        )}
-        {!isOpen && (
-          <div className="w-8 h-8 rounded-lg bg-[var(--color-accent)] mx-auto flex items-center justify-center">
-            <span className="text-white font-bold text-lg">C</span>
+          <div className="flex items-center gap-2 overflow-hidden">
+            <img src={jodLogo} alt="JodTech" className="w-8 h-8 rounded-lg object-cover flex-shrink-0" />
+            <span className="text-white font-bold text-base tracking-tight whitespace-nowrap">JodTech CRM</span>
           </div>
         )}
       </div>
@@ -161,37 +151,22 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       </div>
       
       {/* Footer User Profile & Logout */}
-      <div className="p-4 border-t border-[var(--color-border)] flex items-center justify-between">
-         <div className="flex items-center gap-3 flex-1 overflow-hidden">
-           <div className="w-10 h-10 rounded-full bg-gradient-to-tr from-[var(--color-accent)] to-blue-500 flex items-center justify-center text-white font-bold flex-shrink-0">
-             {getInitials(user.name)}
-           </div>
-           {isOpen && (
-             <div className="flex-1 overflow-hidden">
-               <p className="text-sm font-medium text-white truncate">{user.name}</p>
-               <p className="text-xs text-[var(--color-text-secondary)] truncate">{user.role}</p>
-             </div>
-           )}
-         </div>
-         {isOpen && (
-           <button 
-             onClick={handleLogout}
-             title="Logout"
-             className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors flex-shrink-0"
-           >
-             <LogOut className="w-5 h-5" />
-           </button>
-         )}
+      <div className="p-3 border-t border-[var(--color-border)] flex items-center gap-3">
+        <div className="w-9 h-9 rounded-full bg-gradient-to-tr from-[var(--color-accent)] to-blue-500 flex items-center justify-center text-white font-bold flex-shrink-0 text-sm">
+          {getInitials(user.name)}
+        </div>
+        {isOpen && (
+          <>
+            <div className="flex-1 overflow-hidden">
+              <p className="text-sm font-medium text-white truncate">{user.name}</p>
+              <p className="text-xs text-[var(--color-text-secondary)] truncate">{user.role}</p>
+            </div>
+            <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors flex-shrink-0">
+              <LogOut className="w-4 h-4" />
+            </button>
+          </>
+        )}
       </div>
-      {!isOpen && (
-         <button 
-           onClick={handleLogout}
-           title="Logout"
-           className="p-4 w-full border-t border-[var(--color-border)] flex justify-center text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors"
-         >
-           <LogOut className="w-5 h-5" />
-         </button>
-      )}
     </div>
   );
 };

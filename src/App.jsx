@@ -17,6 +17,7 @@ import Settings from './pages/Settings';
 import Clients from './pages/Clients';
 import Projects from './pages/Projects';
 import WorkUpdate from './pages/WorkUpdate';
+import SalesHistory from './pages/SalesHistory';
 
 // Protected Route Component to enforce login
 const ProtectedRoute = ({ children }) => {
@@ -114,6 +115,7 @@ function App() {
           <Route path="employees"   element={<ProtectedRoute><Employees /></ProtectedRoute>} />
 
           {/* Admin-only modules */}
+          <Route path="history"           element={<AdminProtectedRoute><SalesHistory /></AdminProtectedRoute>} />
           <Route path="tasks"             element={<AdminProtectedRoute><Tasks /></AdminProtectedRoute>} />
           <Route path="employee-accounts" element={<AdminProtectedRoute><EmployeeAccounts /></AdminProtectedRoute>} />
           <Route path="reports"           element={<AdminProtectedRoute><Reports /></AdminProtectedRoute>} />

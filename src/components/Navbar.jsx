@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, Menu, Plus, Users, CheckSquare, Briefcase, X, MessageSquare, Sun, Moon } from 'lucide-react';
+import { Bell, Search, Plus, Users, CheckSquare, Briefcase, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 
-const Navbar = ({ toggleSidebar }) => {
+const Navbar = () => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -136,22 +136,15 @@ const Navbar = ({ toggleSidebar }) => {
   const unreadCount = notifications.filter(n => !n.read).length;
 
   return (
-    <header className="h-16 flex items-center justify-between px-4 lg:px-8 border-b border-[var(--color-border)] bg-[var(--color-secondary-bg)] z-10 sticky top-0 transition-colors duration-300">
-      <div className="flex items-center gap-4">
-        <button 
-          onClick={toggleSidebar}
-          className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-colors"
-        >
-          <Menu className="w-5 h-5" />
-        </button>
-        
+    <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-[var(--color-border)] bg-[var(--color-secondary-bg)] z-10 sticky top-0 transition-colors duration-300">
+      <div className="flex items-center gap-3">
         {/* Search Bar */}
         <div className="hidden md:flex relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] group-focus-within:text-[var(--color-accent)] transition-colors" />
           <input 
             type="text" 
             placeholder="Search leads, tasks, reports..." 
-            className="pl-9 pr-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-full text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] w-64 lg:w-96 transition-all"
+            className="pl-9 pr-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-full text-sm text-[var(--color-text-primary)] placeholder-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] w-56 lg:w-80 transition-all"
           />
         </div>
       </div>
