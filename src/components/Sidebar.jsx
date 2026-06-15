@@ -35,14 +35,24 @@ const adminNavItems = [
   { path: '/settings',          label: 'Settings',          icon: Settings },
 ];
 
-// Employee (Developer / Marketing) nav items — all employees see all modules
-const employeeNavItems = [
+// Marketing nav items
+const marketingNavItems = [
   { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
   { path: '/my-tasks',    label: 'My Tasks',     icon: CheckSquare },
   { path: '/leads',       label: 'Leads',        icon: Users },
   { path: '/clients',     label: 'Clients',      icon: Building },
   { path: '/projects',    label: 'Projects',     icon: FolderKanban },
   { path: '/follow-up',   label: 'Follow Up',    icon: CalendarClock },
+  { path: '/work-update', label: 'Work Update',  icon: ClipboardList },
+  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
+];
+
+// Developer nav items — no Leads
+const developerNavItems = [
+  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { path: '/my-tasks',    label: 'My Tasks',     icon: CheckSquare },
+  { path: '/clients',     label: 'Clients',      icon: Building },
+  { path: '/projects',    label: 'Projects',     icon: FolderKanban },
   { path: '/work-update', label: 'Work Update',  icon: ClipboardList },
   { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
 ];
@@ -58,10 +68,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     }
   }, []);
 
-  // Show correct nav depending on role
   const isAdmin = user.role === 'Admin';
-  // All employees get all employee modules
-  const filteredNavItems = isAdmin ? adminNavItems : employeeNavItems;
+  const filteredNavItems = isAdmin ? adminNavItems
+    : user.role === 'Marketing' ? marketingNavItems
+    : developerNavItems;
 
   const handleLogout = () => {
     localStorage.removeItem('userInfo');

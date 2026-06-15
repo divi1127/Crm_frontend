@@ -104,11 +104,15 @@ function App() {
           <Route index element={<Navigate to="/dashboard" replace />} />
           <Route path="dashboard" element={<Dashboard />} />
 
-          {/* Modules visible to ALL logged-in employees */}
-          <Route path="leads"       element={<ProtectedRoute><Leads /></ProtectedRoute>} />
+          {/* Leads: Admin + Marketing only, Developer gets redirected */}
+          <Route path="leads" element={<MarketingProtectedRoute><Leads /></MarketingProtectedRoute>} />
+
+          {/* Follow-up: Admin + Marketing only */}
+          <Route path="follow-up" element={<MarketingProtectedRoute><FollowUp /></MarketingProtectedRoute>} />
+
+          {/* Accessible to all logged-in users */}
           <Route path="clients"     element={<ProtectedRoute><Clients /></ProtectedRoute>} />
           <Route path="projects"    element={<ProtectedRoute><Projects /></ProtectedRoute>} />
-          <Route path="follow-up"   element={<ProtectedRoute><FollowUp /></ProtectedRoute>} />
           <Route path="work-update" element={<ProtectedRoute><WorkUpdate /></ProtectedRoute>} />
           <Route path="attendance"  element={<ProtectedRoute><Attendance /></ProtectedRoute>} />
           <Route path="my-tasks"    element={<ProtectedRoute><MyTasks /></ProtectedRoute>} />
