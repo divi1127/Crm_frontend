@@ -1,0 +1,126 @@
+@import "tailwindcss";
+
+@theme {
+  --color-primary-bg: var(--primary-bg);
+  --color-secondary-bg: var(--secondary-bg);
+  --color-card-bg: var(--card-bg);
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-text-primary: var(--text-primary);
+  --color-text-secondary: var(--text-secondary);
+  --color-border: var(--border);
+  
+  --font-sans: "Inter", "Poppins", sans-serif;
+}
+
+:root {
+  /* Default: Dark Theme */
+  --primary-bg: #0F172A;
+  --secondary-bg: #0B0F19;
+  --card-bg: #1E293B;
+  --accent: #14B8A6;
+  --accent-hover: #0D9488;
+  --text-primary: #FFFFFF;
+  --text-secondary: #CBD5E1;
+  --border: #334155;
+  color-scheme: dark;
+}
+
+:root.light {
+  /* Light Theme Override */
+  --primary-bg: #F1F5F9;
+  --secondary-bg: #FFFFFF;
+  --card-bg: #FFFFFF;
+  --accent: #0D9488;
+  --accent-hover: #0F766E;
+  --text-primary: #0F172A;
+  --text-secondary: #475569;
+  --border: #CBD5E1;
+  color-scheme: light;
+}
+
+@layer base {
+  body {
+    @apply bg-[var(--color-primary-bg)] text-[var(--color-text-primary)] font-sans antialiased transition-colors duration-300;
+  }
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-primary-bg);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-border);
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-text-secondary);
+}
+
+/* Glassmorphism utility */
+.glass-card {
+  @apply bg-[var(--color-card-bg)]/80 backdrop-blur-md border border-[var(--color-border)] shadow-lg rounded-2xl transition-all duration-300;
+}
+
+/* ======================================================== */
+/* ELEGANT LIGHT THEME CONTRAST & VISIBILITY OVERRIDES       */
+/* ======================================================== */
+
+:root.light .text-white,
+:root.light .text-slate-100,
+:root.light .text-slate-200,
+:root.light .text-slate-300,
+:root.light .text-gray-100,
+:root.light .text-gray-200,
+:root.light .text-gray-300 {
+  color: var(--text-primary) !important;
+}
+
+:root.light .text-slate-400,
+:root.light .text-gray-400 {
+  color: var(--text-secondary) !important;
+}
+
+/* Correcting background transparency values in light mode */
+:root.light .bg-white\/5 {
+  background-color: rgba(15, 23, 42, 0.05) !important;
+}
+
+:root.light .bg-white\/10 {
+  background-color: rgba(15, 23, 42, 0.08) !important;
+}
+
+:root.light .bg-white\/20 {
+  background-color: rgba(15, 23, 42, 0.15) !important;
+}
+
+/* Dropdown option visibility corrections */
+:root.light option {
+  background-color: var(--secondary-bg) !important;
+  color: var(--text-primary) !important;
+}
+
+/* Keep Sidebar beautiful in light mode (retains nice contrast) */
+:root.light aside {
+  background-color: #0B0F19 !important;
+  border-right-color: #1E293B !important;
+}
+:root.light aside * {
+  color: #CBD5E1 !important;
+}
+:root.light aside .text-white {
+  color: #FFFFFF !important;
+}
+:root.light aside .bg-white\/5 {
+  background-color: rgba(255, 255, 255, 0.05) !important;
+}
+:root.light aside .bg-white\/10 {
+  background-color: rgba(255, 255, 255, 0.1) !important;
+}
+:root.light aside .text-teal-400 {
+  color: #14B8A6 !important;
+}
