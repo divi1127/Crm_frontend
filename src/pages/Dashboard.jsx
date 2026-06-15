@@ -18,24 +18,22 @@ const StatCard = ({ title, value, increase, icon: Icon, delay }) => (
     initial={{ opacity: 0, y: 20 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.4, delay }}
-    className="glass-card p-4 sm:p-6 relative overflow-hidden group hover:border-[var(--color-accent)]/50 transition-colors"
+    className="glass-card p-4 relative overflow-hidden group hover:border-[var(--color-accent)]/50 transition-colors"
   >
-    <div className="absolute -right-6 -top-6 w-24 h-24 bg-[var(--color-accent)]/10 rounded-full blur-2xl group-hover:bg-[var(--color-accent)]/20 transition-all"></div>
-    <div className="flex justify-between items-start mb-3">
-      <div>
-        <p className="text-[var(--color-text-secondary)] text-xs sm:text-sm font-medium mb-1">{title}</p>
-        <h3 className="text-2xl sm:text-3xl font-bold text-white">{value}</h3>
+    <div className="absolute -right-4 -top-4 w-20 h-20 bg-[var(--color-accent)]/10 rounded-full blur-2xl group-hover:bg-[var(--color-accent)]/20 transition-all"></div>
+    <div className="flex items-start justify-between gap-2 mb-3">
+      <div className="flex-1 min-w-0">
+        <p className="text-[var(--color-text-secondary)] text-xs font-medium mb-1 truncate">{title}</p>
+        <h3 className="text-2xl font-bold text-white leading-none">{value}</h3>
       </div>
-      <div className="p-2 sm:p-3 rounded-xl bg-white/5 text-[var(--color-accent)] group-hover:scale-110 transition-transform">
-        <Icon className="w-5 h-5 sm:w-6 sm:h-6" />
+      <div className="p-2 rounded-xl bg-white/5 text-[var(--color-accent)] group-hover:scale-110 transition-transform flex-shrink-0">
+        <Icon className="w-5 h-5" />
       </div>
     </div>
-    <div className="flex items-center text-xs sm:text-sm">
-      <span className="flex items-center text-[var(--color-accent)] font-medium">
-        <ArrowUpRight className="w-3 h-3 sm:w-4 sm:h-4 mr-1" />
-        {increase}
-      </span>
-      <span className="text-[var(--color-text-secondary)] ml-2">vs last month</span>
+    <div className="flex items-center gap-1 text-xs">
+      <ArrowUpRight className="w-3 h-3 text-[var(--color-accent)]" />
+      <span className="text-[var(--color-accent)] font-semibold">{increase}</span>
+      <span className="text-[var(--color-text-secondary)]">vs last month</span>
     </div>
   </motion.div>
 );
@@ -174,12 +172,12 @@ const Dashboard = () => {
       </div>
 
       {/* Top Stats */}
-      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 sm:gap-6">
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
         {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Total Leads" value={stats.totalLeads} increase="12.5%" icon={Users} delay={0.1} />}
         {userRole !== 'Developer' && <StatCard title="Total Clients" value={stats.totalClients || 0} increase="4.8%" icon={Building} delay={0.15} />}
         <StatCard title="Active Projects" value={stats.totalProjects || 0} increase="10.2%" icon={FolderKanban} delay={0.2} />
-        {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${stats.salesRevenue.toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
-        {userRole === 'Admin' && <StatCard title="Employee Count" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
+        {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${Number(stats.salesRevenue||0).toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
+        {userRole === 'Admin' && <StatCard title="Employees" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
         <StatCard title="Pending Tasks" value={stats.pendingTasks} increase="18.3%" icon={CheckSquare} delay={0.35} />
       </div>
 
