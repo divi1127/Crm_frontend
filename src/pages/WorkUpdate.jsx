@@ -14,7 +14,7 @@ import {
   ChevronDown,
   ChevronUp
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const WorkUpdate = () => {
   const [user, setUser] = useState(null);
@@ -66,7 +66,7 @@ const WorkUpdate = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get(`/api/work-updates/my?date=${date}`, config);
+      const { data } = await api.get(`/api/work-updates/my?date=${date}`, config);
       
       if (data) {
         setFormData({
@@ -101,7 +101,7 @@ const WorkUpdate = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get(`/api/work-updates/team?date=${date}`, config);
+      const { data } = await api.get(`/api/work-updates/team?date=${date}`, config);
       setTeamUpdates(data || []);
     } catch (err) {
       console.error(err);
@@ -146,7 +146,7 @@ const WorkUpdate = () => {
         ...formData
       };
 
-      await axios.post('/api/work-updates/my', payload, config);
+      await api.post('/api/work-updates/my', payload, config);
       setMessage({ type: 'success', text: 'Daily work update submitted successfully!' });
       
       // Auto dismiss success message after 3 seconds

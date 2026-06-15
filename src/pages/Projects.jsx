@@ -5,7 +5,7 @@ import {
   ExternalLink, Briefcase, FileText, CheckCircle2, 
   Clock, AlertCircle, Building, Download
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 
 const Projects = () => {
@@ -39,8 +39,8 @@ const Projects = () => {
       
       // Fetch both projects and clients concurrently
       const [projectsRes, clientsRes] = await Promise.all([
-        axios.get('/api/projects', config),
-        axios.get('/api/clients', config)
+        api.get('/api/projects', config),
+        api.get('/api/clients', config)
       ]);
       
       setProjects(projectsRes.data);
@@ -65,10 +65,10 @@ const Projects = () => {
       };
 
       if (isEdit) {
-        const { data } = await axios.put(`/api/projects/${editId}`, payload, config);
+        const { data } = await api.put(`/api/projects/${editId}`, payload, config);
         setProjects(projects.map(p => p.id === editId ? data : p));
       } else {
-        const { data } = await axios.post('/api/projects', payload, config);
+        const { data } = await api.post('/api/projects', payload, config);
         setProjects([data, ...projects]);
       }
       
@@ -103,7 +103,7 @@ const Projects = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/projects/${id}`, config);
+      await api.delete(`/api/projects/${id}`, config);
       setProjects(projects.filter(p => p.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete project.');

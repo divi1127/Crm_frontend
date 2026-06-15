@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { User, Bell, Lock, Building, Save, UploadCloud, CheckCircle, Mail, Briefcase, Globe, Phone, MapPin, DollarSign, Clock } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Settings = () => {
   const [activeTab, setActiveTab] = useState('company');
@@ -48,7 +48,7 @@ const Settings = () => {
   const fetchCompanySettings = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get('/api/settings/company', config);
+      const { data } = await api.get('/api/settings/company', config);
       if (data) {
         setCompanyForm({
           companyName: data.companyName || '',
@@ -75,7 +75,7 @@ const Settings = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put('/api/settings/company', companyForm, config);
+      await api.put('/api/settings/company', companyForm, config);
       setSaveSuccess(true);
       setTimeout(() => setSaveSuccess(false), 3000);
     } catch (error) {

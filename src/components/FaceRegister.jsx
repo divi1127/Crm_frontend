@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, CheckCircle2, AlertCircle, Loader2, User, Scan, RefreshCw } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
 const FACEAPI_CDN = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
@@ -119,7 +119,7 @@ const FaceRegister = ({ userId, userName, onClose, onSuccess }) => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config   = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.put(`/api/users/${userId}/face`, { descriptor: captured }, config);
+      await api.put(`/api/users/${userId}/face`, { descriptor: captured }, config);
       setStep('done');
       setMessage(`✓ Face registered for ${userName}! They can now use Face Check-In.`);
       stopCamera();

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X, CheckCircle2, AlertCircle, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
 const FACEAPI_CDN = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
@@ -66,7 +66,7 @@ const FaceLoginVerify = ({ userInfo, onClose, onSuccess }) => {
       }
 
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data: users } = await axios.get('/api/users/faces', config);
+      const { data: users } = await api.get('/api/users/faces', config);
       const registered = users
         .filter((u) => u.faceDescriptor)
         .map((u) => ({
@@ -224,7 +224,7 @@ const FaceLoginVerify = ({ userInfo, onClose, onSuccess }) => {
         photo,
       };
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/attendances/checkin', payload, config);
+      const { data } = await api.post('/api/attendances/checkin', payload, config);
       setSummary({ photo, location, time: now.toLocaleString(), record: data });
       setStep('success');
       setMessage('Face verified and attendance recorded. Redirecting to dashboard...');

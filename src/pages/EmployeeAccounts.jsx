@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Mail, Shield, X, Edit, Trash2, Copy, CheckCircle } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const EmployeeAccounts = () => {
   const [employees, setEmployees] = useState([]);
@@ -34,7 +34,7 @@ const EmployeeAccounts = () => {
   const fetchEmployees = async (userInfo) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('/api/auth/employees', config);
+      const { data } = await api.get('/api/auth/employees', config);
       setEmployees(data);
     } catch (error) {
       console.error('Error fetching employees', error);
@@ -59,11 +59,11 @@ const EmployeeAccounts = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
       if (isEdit) {
-        const { data } = await axios.put(`/api/auth/employees/${editId}`, formData, config);
+        const { data } = await api.put(`/api/auth/employees/${editId}`, formData, config);
         setEmployees(employees.map(emp => emp.id === editId ? data : emp));
         setSuccessMessage('Employee updated successfully');
       } else {
-        const { data } = await axios.post('/api/auth/create-employee', formData, config);
+        const { data } = await api.post('/api/auth/create-employee', formData, config);
         setEmployees([data, ...employees]);
         setSuccessMessage('Employee created successfully');
       }
@@ -82,7 +82,7 @@ const EmployeeAccounts = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/auth/employees/${id}`, config);
+      await api.delete(`/api/auth/employees/${id}`, config);
       setEmployees(employees.filter(emp => emp.id !== id));
       setSuccessMessage('Employee deleted successfully');
       setTimeout(() => setSuccessMessage(''), 3000);

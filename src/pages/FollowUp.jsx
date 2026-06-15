@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Calendar, PhoneCall, Video, Mail, Clock, Plus, Edit, Trash2, X, Download } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 
 const FollowUp = () => {
@@ -38,7 +38,7 @@ const FollowUp = () => {
   const fetchFollowUps = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get('/api/followups', config);
+      const { data } = await api.get('/api/followups', config);
       setFollowUps(data);
     } catch (error) {
       console.error('Error fetching follow-ups', error);
@@ -54,10 +54,10 @@ const FollowUp = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
       if (isEdit) {
-        const { data } = await axios.put(`/api/followups/${editId}`, formData, config);
+        const { data } = await api.put(`/api/followups/${editId}`, formData, config);
         setFollowUps(followUps.map(f => f.id === editId ? data : f));
       } else {
-        const { data } = await axios.post('/api/followups', formData, config);
+        const { data } = await api.post('/api/followups', formData, config);
         setFollowUps([...followUps, data]);
       }
 
@@ -87,7 +87,7 @@ const FollowUp = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/followups/${id}`, config);
+      await api.delete(`/api/followups/${id}`, config);
       setFollowUps(followUps.filter(f => f.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete follow-up.');

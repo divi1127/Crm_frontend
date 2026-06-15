@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, Search, Filter, Edit, Trash2, X, Phone, Mail, MapPin, Download } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -44,7 +44,7 @@ const Leads = () => {
   const fetchLeads = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get('/api/leads', config);
+      const { data } = await api.get('/api/leads', config);
       setLeads(data);
     } catch (error) {
       console.error('Error fetching leads', error);
@@ -61,11 +61,11 @@ const Leads = () => {
       
       if (isEdit) {
         // Edit flow
-        const { data } = await axios.put(`/api/leads/${editId}`, formData, config);
+        const { data } = await api.put(`/api/leads/${editId}`, formData, config);
         setLeads(leads.map(l => l.id === editId ? data : l));
       } else {
         // Add flow
-        const { data } = await axios.post('/api/leads', formData, config);
+        const { data } = await api.post('/api/leads', formData, config);
         setLeads([data, ...leads]);
       }
       
@@ -97,7 +97,7 @@ const Leads = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/leads/${id}`, config);
+      await api.delete(`/api/leads/${id}`, config);
       setLeads(leads.filter(l => l.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete lead.');

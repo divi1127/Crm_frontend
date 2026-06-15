@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Plus, X, Calendar as CalendarIcon, User, Download, Edit, Trash2, Users } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import { useLocation, useNavigate } from 'react-router-dom';
 
@@ -40,7 +40,7 @@ const Tasks = () => {
   const fetchTasks = async (userInfo) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('/api/tasks', config);
+      const { data } = await api.get('/api/tasks', config);
       setTasks(data);
     } catch (error) {
       console.error('Error fetching tasks', error);
@@ -52,7 +52,7 @@ const Tasks = () => {
   const fetchEmployees = async (userInfo) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('/api/users', config);
+      const { data } = await api.get('/api/users', config);
       setEmployees(data);
     } catch (error) {
       console.error('Error fetching employees list:', error);
@@ -82,10 +82,10 @@ const Tasks = () => {
       };
 
       if (isEdit) {
-        await axios.put(`/api/tasks/${editId}`, payload, config);
+        await api.put(`/api/tasks/${editId}`, payload, config);
         fetchTasks(userInfo);
       } else {
-        const { data } = await axios.post('/api/tasks', payload, config);
+        const { data } = await api.post('/api/tasks', payload, config);
         setTasks(prev => [data, ...prev]);
       }
 
@@ -117,7 +117,7 @@ const Tasks = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/tasks/${id}`, config);
+      await api.delete(`/api/tasks/${id}`, config);
       setTasks(prev => prev.filter(t => t.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete task.');

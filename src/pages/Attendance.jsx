@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Clock, Calendar, CheckCircle2, XCircle, AlertCircle, Download, Plus, X, Trash2, Edit, Scan } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import FaceCheckIn from '../components/FaceCheckIn';
 
@@ -43,8 +43,8 @@ const Attendance = () => {
   const fetchData = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const resAttendance = await axios.get('/api/attendances', config);
-      const resLeave = await axios.get('/api/leaverequests', config);
+      const resAttendance = await api.get('/api/attendances', config);
+      const resLeave = await api.get('/api/leaverequests', config);
       setAttendances(resAttendance.data);
       setLeaveRequests(resLeave.data);
     } catch (error) {
@@ -59,7 +59,7 @@ const Attendance = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/attendances', attendanceForm, config);
+      const { data } = await api.post('/api/attendances', attendanceForm, config);
       setAttendances([data, ...attendances]);
       setShowAddModal(false);
       setAttendanceForm({ employeeName: '', date: '', checkIn: '', checkOut: '', type: 'Office', status: 'Present' });
@@ -73,7 +73,7 @@ const Attendance = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/leaverequests', leaveForm, config);
+      const { data } = await api.post('/api/leaverequests', leaveForm, config);
       setLeaveRequests([data, ...leaveRequests]);
       setShowLeaveModal(false);
       setLeaveForm({ employeeName: '', department: '', type: 'Sick', startDate: '', endDate: '', reason: '', status: 'Pending' });
@@ -87,7 +87,7 @@ const Attendance = () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/attendances/checkin', {}, config);
+      const { data } = await api.post('/api/attendances/checkin', {}, config);
       setAttendances([data, ...attendances]);
       alert('Checked in at ' + data.checkIn);
     } catch (error) {
@@ -100,7 +100,7 @@ const Attendance = () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/attendances/checkout', {}, config);
+      const { data } = await api.post('/api/attendances/checkout', {}, config);
       // update the attendance entry for today if exists
       setAttendances(attendances.map(a => (a.employeeName === data.employeeName && a.date === data.date) ? data : a));
       alert('Checked out at ' + data.checkOut);
@@ -113,7 +113,7 @@ const Attendance = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.put(`/api/leaverequests/${id}`, { status }, config);
+      const { data } = await api.put(`/api/leaverequests/${id}`, { status }, config);
       setLeaveRequests(leaveRequests.map(r => r.id === id ? data : r));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to update leave request.');
@@ -125,7 +125,7 @@ const Attendance = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/attendances/${id}`, config);
+      await api.delete(`/api/attendances/${id}`, config);
       setAttendances(attendances.filter(a => a.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete attendance log.');
@@ -137,7 +137,7 @@ const Attendance = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/leaverequests/${id}`, config);
+      await api.delete(`/api/leaverequests/${id}`, config);
       setLeaveRequests(leaveRequests.filter(l => l.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete leave request.');

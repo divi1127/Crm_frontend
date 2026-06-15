@@ -4,7 +4,7 @@ import {
   CheckSquare, Calendar, User, AlertCircle, ChevronDown,
   ClipboardList, Clock, CheckCircle2, ArrowRight, RefreshCw
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const STATUS_OPTIONS = [
   { value: 'todo',       label: 'To Do',      color: 'bg-blue-500/10 text-blue-400 border-blue-500/30' },
@@ -36,7 +36,7 @@ const MyTasks = () => {
     setLoading(true);
     try {
       const config = { headers: { Authorization: `Bearer ${info.token}` } };
-      const { data } = await axios.get('/api/tasks', config);
+      const { data } = await api.get('/api/tasks', config);
       setTasks(data);
     } catch (err) {
       console.error('Failed to load tasks:', err);
@@ -50,7 +50,7 @@ const MyTasks = () => {
     try {
       const info = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${info.token}` } };
-      const { data } = await axios.put(`/api/tasks/${taskId}`, { status: newStatus }, config);
+      const { data } = await api.put(`/api/tasks/${taskId}`, { status: newStatus }, config);
       setTasks(prev => prev.map(t => t.id === taskId ? data : t));
     } catch (err) {
       alert(err.response?.data?.message || 'Failed to update status.');

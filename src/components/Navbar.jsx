@@ -2,7 +2,7 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Bell, Search, Menu, Plus, Users, CheckSquare, Briefcase, X, MessageSquare, Sun, Moon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import axios from 'axios';
+import api from '../utils/api';
 
 const Navbar = ({ toggleSidebar }) => {
   const [showDropdown, setShowDropdown] = useState(false);
@@ -49,7 +49,7 @@ const Navbar = ({ toggleSidebar }) => {
         const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
         
         // Fetch dashboard metrics & recent items
-        const { data } = await axios.get('/api/dashboard', config);
+        const { data } = await api.get('/api/dashboard', config);
         
         const list = [];
         

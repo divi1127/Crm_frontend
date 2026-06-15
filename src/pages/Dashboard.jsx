@@ -9,7 +9,7 @@ import {
   AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, 
   ResponsiveContainer, BarChart, Bar 
 } from 'recharts';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import { useNavigate } from 'react-router-dom';
 
@@ -65,7 +65,7 @@ const Dashboard = () => {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
       
-      const { data } = await axios.get('/api/dashboard', config);
+      const { data } = await api.get('/api/dashboard', config);
       setDashboardData(data);
     } catch (error) {
       console.error('Failed to fetch dashboard data:', error);
@@ -90,7 +90,7 @@ const Dashboard = () => {
   const fetchMyTasks = async (userInfo) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('/api/tasks', config);
+      const { data } = await api.get('/api/tasks', config);
       setMyTasks(data);
     } catch (err) {
       console.error('Failed to fetch my tasks', err);
@@ -104,9 +104,9 @@ const Dashboard = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
       if (isEdit) {
-        await axios.put(`/api/salesdeals/${editId}`, formData, config);
+        await api.put(`/api/salesdeals/${editId}`, formData, config);
       } else {
-        await axios.post('/api/salesdeals', formData, config);
+        await api.post('/api/salesdeals', formData, config);
       }
       
       setShowModal(false);
@@ -134,7 +134,7 @@ const Dashboard = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/salesdeals/${id}`, config);
+      await api.delete(`/api/salesdeals/${id}`, config);
       fetchDashboardData();
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete sales deal.');

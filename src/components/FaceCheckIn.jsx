@@ -4,7 +4,7 @@ import {
   Camera, X, CheckCircle2, AlertCircle, Loader2,
   Scan, UserCheck, RefreshCw, ShieldCheck
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 
 const MODEL_URL    = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
 const FACEAPI_CDN  = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
@@ -71,7 +71,7 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
 
       /* fetch registered face descriptors */
       const config   = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data: users } = await axios.get('/api/users/faces', config);
+      const { data: users } = await api.get('/api/users/faces', config);
 
       const registered = users
         .filter(u => u.faceDescriptor)
@@ -203,7 +203,7 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config   = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.post('/api/attendances/checkin', {
+      const { data } = await api.post('/api/attendances/checkin', {
         employeeId:    employee.id,
         employeeName:  employee.name,
         faceVerified:  true,

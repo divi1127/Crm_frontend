@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Search, Plus, Mail, Phone, MapPin, X, Calendar, Download, Edit, Trash2, Scan, CheckCircle2 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import { useLocation, useNavigate } from 'react-router-dom';
 import FaceRegister from '../components/FaceRegister';
@@ -41,7 +41,7 @@ const Employees = () => {
   const fetchFaceStatus = async (userInfo) => {
     try {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      const { data } = await axios.get('/api/users/faces', config);
+      const { data } = await api.get('/api/users/faces', config);
       const map = {};
       data.forEach(u => { map[u.id] = !!u.faceDescriptor; });
       setUserFaceMap(map);
@@ -53,7 +53,7 @@ const Employees = () => {
   const fetchEmployees = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get('/api/employees', config);
+      const { data } = await api.get('/api/employees', config);
       setEmployees(data);
     } catch (error) {
       console.error('Error fetching employees', error);
@@ -69,10 +69,10 @@ const Employees = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
       if (isEdit) {
-        const { data } = await axios.put(`/api/employees/${editId}`, formData, config);
+        const { data } = await api.put(`/api/employees/${editId}`, formData, config);
         setEmployees(employees.map(emp => emp.id === editId ? data : emp));
       } else {
-        const { data } = await axios.post('/api/employees', formData, config);
+        const { data } = await api.post('/api/employees', formData, config);
         setEmployees([data.employee, ...employees]);
       }
       
@@ -106,7 +106,7 @@ const Employees = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/employees/${id}`, config);
+      await api.delete(`/api/employees/${id}`, config);
       setEmployees(employees.filter(emp => emp.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete employee.');
@@ -341,7 +341,7 @@ const FaceRegisterByEmail = ({ userEmail, userName, onClose, onSuccess }) => {
           return;
         }
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-        const { data } = await axios.get('/api/users/faces', config);
+        const { data } = await api.get('/api/users/faces', config);
         const match = data.find(u => u.email === userEmail);
         if (!match) {
           setError('No associated login user found for this employee email. Ensure the employee has a user account.');

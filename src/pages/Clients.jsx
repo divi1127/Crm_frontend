@@ -5,7 +5,7 @@ import {
   Briefcase, Activity, CheckCircle2, ChevronRight, ShoppingBag, 
   AlertTriangle, Truck, Download
 } from 'lucide-react';
-import axios from 'axios';
+import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 
 const Clients = () => {
@@ -38,7 +38,7 @@ const Clients = () => {
   const fetchClients = async (userInfo) => {
     try {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
-      const { data } = await axios.get('/api/clients', config);
+      const { data } = await api.get('/api/clients', config);
       setClients(data);
     } catch (error) {
       console.error('Error fetching clients:', error);
@@ -54,10 +54,10 @@ const Clients = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       
       if (isEdit) {
-        const { data } = await axios.put(`/api/clients/${editId}`, formData, config);
+        const { data } = await api.put(`/api/clients/${editId}`, formData, config);
         setClients(clients.map(c => c.id === editId ? data : c));
       } else {
-        const { data } = await axios.post('/api/clients', formData, config);
+        const { data } = await api.post('/api/clients', formData, config);
         setClients([data, ...clients]);
       }
       
@@ -98,7 +98,7 @@ const Clients = () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
-      await axios.delete(`/api/clients/${id}`, config);
+      await api.delete(`/api/clients/${id}`, config);
       setClients(clients.filter(c => c.id !== id));
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to delete client.');
