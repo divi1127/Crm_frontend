@@ -89,7 +89,7 @@ const Attendance = () => {
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkin', {}, config);
       setAttendances([data, ...attendances]);
-      alert('Checked in at ' + data.checkIn);
+      alert('✓ Checked in at ' + data.checkIn + ' (IST)');
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to check in.');
     }
@@ -101,9 +101,8 @@ const Attendance = () => {
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkout', {}, config);
-      // update the attendance entry for today if exists
       setAttendances(attendances.map(a => (a.employeeName === data.employeeName && a.date === data.date) ? data : a));
-      alert('Checked out at ' + data.checkOut);
+      alert('✓ Checked out at ' + data.checkOut + ' (IST)');
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to check out.');
     }
