@@ -22,6 +22,7 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
   const streamRef   = useRef(null);
   const intervalRef = useRef(null);
   const isActiveRef = useRef(true);
+  const hasCheckedInRef = useRef(false);
 
   const [step, setStep]         = useState('loading');
   // loading | ready | scanning | matched | noFace | error | noMatch
@@ -160,6 +161,10 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
             return;
           }
 
+          // Guard: prevent multiple checkin calls
+          if (hasCheckedInRef.current) return;
+          hasCheckedInRef.current = true;
+
           setMessage(`✓ Recognised: ${bestMatch.name} (${pct}% confidence). Checking in...`);
           await performCheckIn(bestMatch);
         } else {
@@ -233,6 +238,7 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
     setMessage('Restarting...');
     setMatched(null);
     isActiveRef.current = true;
+    hasCheckedInRef.current = false;
     initAll();
   };
 
