@@ -64,6 +64,30 @@ const Employees = () => {
 
   const handleSaveEmployee = async (e) => {
     e.preventDefault();
+
+    // ── Frontend Validation ──
+    if (formData.name.trim().length < 2) {
+      return alert('Full name must be at least 2 characters.');
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+      return alert('Please enter a valid email address.');
+    }
+    if (!formData.username.trim()) {
+      return alert('Username is required.');
+    }
+    if (formData.phone && !/^[0-9+\-\s]{7,15}$/.test(formData.phone)) {
+      return alert('Phone number must contain only digits (7–15 characters).');
+    }
+    if (!formData.role.trim()) {
+      return alert('Job Role is required.');
+    }
+    if (!formData.department.trim()) {
+      return alert('Department is required.');
+    }
+    if (!isEdit && formData.password.length < 6) {
+      return alert('Password must be at least 6 characters.');
+    }
+
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
@@ -268,7 +292,7 @@ const Employees = () => {
                   
                   <div>
                     <label className="text-sm text-[var(--color-text-secondary)]">Phone Number</label>
-                    <input type="tel" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
+                    <input type="tel" pattern="[0-9+\-\s]{7,15}" title="Enter a valid phone number (7-15 digits)" value={formData.phone} onChange={e => setFormData({...formData, phone: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
                   </div>
                   <div className={isEdit ? "col-span-1 md:col-span-2" : "col-span-1"}>
                     <label className="text-sm text-[var(--color-text-secondary)]">Home Address</label>
@@ -308,19 +332,6 @@ const Employees = () => {
               </form>
             </motion.div>
           </div>
-        )}
-      </AnimatePresence>
-      <AnimatePresence>
-        {faceRegTarget && (
-          <FaceRegisterByEmail
-            userEmail={faceRegTarget.userEmail}
-            userName={faceRegTarget.userName}
-            onClose={() => setFaceRegTarget(null)}
-            onSuccess={() => {
-              const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-              fetchFaceStatus(userInfo);
-            }}
-          />
         )}
       </AnimatePresence>
     </div>

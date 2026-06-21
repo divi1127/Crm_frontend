@@ -45,7 +45,14 @@ const Attendance = () => {
       const config = userInfo ? { headers: { Authorization: `Bearer ${userInfo.token}` } } : {};
       const resAttendance = await api.get('/api/attendances', config);
       const resLeave = await api.get('/api/leaverequests', config);
-      setAttendances(resAttendance.data);
+      // Deduplicate by id to prevent any visual duplicate rows
+      const seen = new Set();
+      const unique = resAttendance.data.filter(a => {
+        if (seen.has(a.id)) return false;
+        seen.add(a.id);
+        return true;
+      });
+      setAttendances(unique);
       setLeaveRequests(resLeave.data);
     } catch (error) {
       console.error('Error fetching attendance data', error);
@@ -88,7 +95,12 @@ const Attendance = () => {
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkin', {}, config);
-      setAttendances([data, ...attendances]);
+      // Replace existing record for same day if it exists, else prepend
+      setAttendances(prev => {
+        const exists = prev.some(a => a.id === data.id);
+        if (exists) return prev.map(a => a.id === data.id ? data : a);
+        return [data, ...prev];
+      });
       alert('✓ Checked in at ' + data.checkIn + ' (IST)');
     } catch (error) {
       alert(error.response?.data?.message || 'Failed to check in.');
@@ -405,10 +417,11 @@ const Attendance = () => {
           <FaceCheckIn
             onClose={() => setShowFaceCheckIn(false)}
             onSuccess={(record, name) => {
-              // refresh list so new check-in appears immediately
+              // Refresh list — fetchData already deduplicates
               const userInfo = JSON.parse(localStorage.getItem('userInfo'));
               fetchData(userInfo);
-              alert(`✓ ${name} checked in successfully via Face Recognition!`);
+              // Small delay so DB write completes before re-fetch
+              setTimeout(() => fetchData(userInfo), 1500);
             }}
           />
         )}

@@ -1,18 +1,39 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Mail, ArrowLeft } from 'lucide-react';
+import { Mail, ArrowLeft, Loader2 } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import api from '../utils/api';
 
 const ForgotPassword = () => {
   const [email, setEmail] = useState('');
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [newPassword, setNewPassword] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Simulate API call for reset password
-    setTimeout(() => {
+    setError('');
+
+    if (!email.trim()) {
+      return setError('Please enter your email address.');
+    }
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      return setError('Please enter a valid email address.');
+    }
+    if (!newPassword.trim() || newPassword.length < 6) {
+      return setError('New password must be at least 6 characters.');
+    }
+
+    setLoading(true);
+    try {
+      await api.post('/api/auth/forgot-password', { email, newPassword });
       setSubmitted(true);
-    }, 1000);
+    } catch (err) {
+      setError(err.response?.data?.message || 'No account found with this email address. Please check and try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -34,7 +55,7 @@ const ForgotPassword = () => {
                   <LockIcon className="w-6 h-6 text-[var(--color-accent)]" />
                 </div>
                 <h2 className="text-2xl font-bold text-white mb-2">Reset Password</h2>
-                <p className="text-[var(--color-text-secondary)] text-sm">Enter your email address and we'll send you a link to reset your password.</p>
+                <p className="text-[var(--color-text-secondary)] text-sm">Enter your registered email and a new password to reset your account credentials.</p>
               </div>
 
               <form onSubmit={handleSubmit} className="space-y-5">
@@ -50,8 +71,31 @@ const ForgotPassword = () => {
                   </div>
                 </div>
 
-                <button type="submit" className="w-full py-3 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-medium rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all active:scale-[0.98]">
-                  Send Reset Link
+                <div className="space-y-1.5">
+                  <label className="text-sm font-medium text-white ml-1">New Password</label>
+                  <div className="relative">
+                    <LockIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-[var(--color-text-secondary)] pointer-events-none" />
+                    <input 
+                      type="password" required value={newPassword} onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Min 6 characters" 
+                      minLength={6}
+                      className="w-full pl-10 pr-4 py-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white placeholder-[var(--color-text-secondary)] focus:outline-none focus:border-[var(--color-accent)] focus:ring-1 focus:ring-[var(--color-accent)] transition-all"
+                    />
+                  </div>
+                </div>
+
+                {error && (
+                  <div className="px-4 py-3 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                    {error}
+                  </div>
+                )}
+
+                <button 
+                  type="submit" 
+                  disabled={loading}
+                  className="w-full py-3 px-4 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-medium rounded-xl shadow-[0_0_20px_rgba(20,184,166,0.3)] transition-all active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+                >
+                  {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Resetting...</> : 'Reset Password'}
                 </button>
               </form>
             </>
@@ -60,14 +104,18 @@ const ForgotPassword = () => {
               <div className="w-16 h-16 bg-teal-500/20 border border-teal-500/30 rounded-full mx-auto flex items-center justify-center mb-6">
                 <Mail className="w-8 h-8 text-teal-400" />
               </div>
-              <h2 className="text-2xl font-bold text-white mb-3">Check Your Email</h2>
-              <p className="text-[var(--color-text-secondary)] text-sm mb-8">
-                We've sent a password reset link to <br/>
-                <span className="text-white font-medium">{email}</span>
+              <h2 className="text-2xl font-bold text-white mb-3">Password Reset!</h2>
+              <p className="text-[var(--color-text-secondary)] text-sm mb-2">
+                Your password has been successfully reset for
               </p>
-              <button onClick={() => setSubmitted(false)} className="text-sm text-[var(--color-accent)] hover:text-white transition-colors">
-                Didn't receive the email? Click to resend.
-              </button>
+              <p className="text-white font-semibold mb-6">{email}</p>
+              <p className="text-xs text-[var(--color-text-secondary)] mb-8">You can now log in with your new password.</p>
+              <Link
+                to="/login"
+                className="inline-flex items-center gap-2 px-6 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium rounded-xl transition-colors"
+              >
+                Go to Login
+              </Link>
             </div>
           )}
 

@@ -114,6 +114,26 @@ const FaceRegister = ({ userId, userName, onClose, onSuccess }) => {
 
   const saveFace = async () => {
     if (!captured) return;
+    // Check if face is already registered for this user
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const config   = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data: users } = await api.get('/api/users/faces', config);
+      const thisUser = users.find(u => u.id === userId);
+      if (thisUser && thisUser.faceDescriptor) {
+        const confirmed = window.confirm(
+          `A face is already registered for ${userName}.\n\nClick OK to overwrite with the new face, or Cancel to keep the existing registration.`
+        );
+        if (!confirmed) {
+          // Revert to ready so they can retake
+          retake();
+          return;
+        }
+      }
+    } catch (_) {
+      // If check fails, proceed anyway
+    }
+
     setStep('saving');
     setMessage('Saving face to database...');
     try {

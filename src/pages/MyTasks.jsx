@@ -45,7 +45,12 @@ const MyTasks = () => {
     }
   };
 
-  const handleStatusChange = async (taskId, newStatus) => {
+  const handleStatusChange = async (taskId, newStatus, currentStatus) => {
+    // Lock: once completed, employees cannot change status
+    if (currentStatus === 'completed') {
+      alert('✓ This task is marked as Completed and cannot be changed. Contact your Admin if needed.');
+      return;
+    }
     setUpdating(taskId);
     try {
       const info = JSON.parse(localStorage.getItem('userInfo'));
@@ -223,21 +228,29 @@ const MyTasks = () => {
                     {/* Right - Status Updater */}
                     <div className="flex flex-col items-end gap-2 shrink-0">
                       <p className="text-xs text-[var(--color-text-secondary)] font-medium mb-1">Update Status:</p>
-                      <div className="relative">
-                        <select
-                          value={task.status}
-                          onChange={e => handleStatusChange(task.id, e.target.value)}
-                          disabled={isUpdating}
-                          className={`appearance-none pr-8 pl-3 py-2 rounded-lg text-sm font-semibold border cursor-pointer transition-all bg-[var(--color-primary-bg)] outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50 ${statusObj.color}`}
-                        >
-                          {STATUS_OPTIONS.map(opt => (
-                            <option key={opt.value} value={opt.value} className="bg-[#1E293B] text-white">
-                              {opt.label}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" />
-                      </div>
+                      {task.status === 'completed' ? (
+                        <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-teal-500/10 border border-teal-500/30 text-teal-400 text-sm font-semibold">
+                          <CheckCircle2 className="w-4 h-4" />
+                          Completed
+                          <span className="text-[10px] ml-1 opacity-60">(locked)</span>
+                        </div>
+                      ) : (
+                        <div className="relative">
+                          <select
+                            value={task.status}
+                            onChange={e => handleStatusChange(task.id, e.target.value, task.status)}
+                            disabled={isUpdating}
+                            className={`appearance-none pr-8 pl-3 py-2 rounded-lg text-sm font-semibold border cursor-pointer transition-all bg-[var(--color-primary-bg)] outline-none focus:ring-1 focus:ring-[var(--color-accent)] disabled:opacity-50 ${statusObj.color}`}
+                          >
+                            {STATUS_OPTIONS.map(opt => (
+                              <option key={opt.value} value={opt.value} className="bg-[#1E293B] text-white">
+                                {opt.label}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 w-3.5 h-3.5 pointer-events-none" />
+                        </div>
+                      )}
                       {isUpdating && (
                         <p className="text-xs text-[var(--color-accent)] flex items-center gap-1">
                           <RefreshCw className="w-3 h-3 animate-spin" /> Saving...

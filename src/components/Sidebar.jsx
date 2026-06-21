@@ -17,6 +17,7 @@ import {
   Menu
 } from 'lucide-react';
 import jodLogo from '../assets/jod.jpeg';
+import api from '../utils/api';
 
 // Admin-only nav items
 const adminNavItems = [
@@ -73,9 +74,20 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     : user.role === 'Marketing' ? marketingNavItems
     : developerNavItems;
 
-  const handleLogout = () => {
-    localStorage.removeItem('userInfo');
-    navigate('/login');
+  const handleLogout = async () => {
+    try {
+      // Auto checkout on logout for non-admin employees
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      if (userInfo && userInfo.role !== 'Admin') {
+        const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+        await api.post('/api/attendances/checkout', {}, config);
+      }
+    } catch (_) {
+      // If no check-in exists today or any other error — just proceed with logout silently
+    } finally {
+      localStorage.removeItem('userInfo');
+      navigate('/login');
+    }
   };
 
   const getInitials = (name) => {
