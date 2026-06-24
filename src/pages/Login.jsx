@@ -182,37 +182,15 @@ const Login = () => {
             </p>
           </header>
 
-          {/* Quick Access Toggles (Centered) */}
-          <div className="grid grid-cols-3 gap-2 mb-10 p-1.5 bg-white/5 rounded-2xl border border-white/5 w-full">
-            {['Admin', 'Marketing', 'Developer', 'HR', 'MD', 'Employee'].map((label) => {
-              const emailMap = { 
-                Admin: 'admin@crm.io', 
-                Marketing: 'marketing@crm.io', 
-                Developer: 'developer@crm.io',
-                HR: 'hr@crm.io',
-                MD: 'md@crm.io',
-                Employee: 'employee@crm.io'
-              };
-              const isSelected = activeTab === label;
-              return (
-                <button
-                  key={label}
-                  type="button"
-                  onClick={() => { 
-                    setEmail(emailMap[label]); 
-                    setPassword('password123'); 
-                    setActiveTab(label); 
-                  }}
-                  className={`px-5 py-2 rounded-[12px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
-                    isSelected 
-                      ? 'bg-violet-600/20 text-violet-400 border border-violet-500/20 shadow-inner' 
-                      : 'text-slate-500 hover:text-slate-300'
-                  }`}
-                >
-                  {label}
-                </button>
-              );
-            })}
+          {/* Quick Access Toggles (Admin Only) */}
+          <div className="mb-10 p-1.5 bg-white/5 rounded-2xl border border-white/5 w-full">
+            <button
+              type="button"
+              onClick={() => { setEmail('admin@crm.io'); setPassword('password123'); setActiveTab('Admin'); }}
+              className="w-full py-2 rounded-[12px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 bg-violet-600/20 text-violet-400 border border-violet-500/20 shadow-inner"
+            >
+              Admin
+            </button>
           </div>
 
           {error && (
