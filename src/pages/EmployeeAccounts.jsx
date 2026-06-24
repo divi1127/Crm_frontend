@@ -59,6 +59,7 @@ const EmployeeAccounts = () => {
       alert('Password must be at least 6 characters.');
       return;
     }
+    try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
@@ -336,21 +337,21 @@ const EmployeeAccounts = () => {
                   <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">
                     Password {isEdit && '(Leave empty to keep current)'}
                   </label>
-                <div className="relative">
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    name="password"
-                    value={formData.password}
-                    onChange={handleChange}
-                    required={!isEdit}
-                    minLength={isEdit ? undefined : 6}
-                    className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none pr-10"
-                    placeholder={isEdit ? 'Leave empty to keep current' : 'Min 6 characters'}
-                  />
-                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
-                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                  </button>
-                </div>
+                  <div className="relative">
+                    <input
+                      type={showPassword ? 'text' : 'password'}
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      required={!isEdit}
+                      minLength={isEdit ? undefined : 6}
+                      className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none pr-10"
+                      placeholder={isEdit ? 'Leave empty to keep current' : 'Min 6 characters'}
+                    />
+                    <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
                 </div>
 
                 <div>

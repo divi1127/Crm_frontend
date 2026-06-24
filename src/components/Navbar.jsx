@@ -216,38 +216,38 @@ const Navbar = () => {
 
         {/* Quick Add Dropdown - Admin only */}
         {isAdmin && (
-        <div className="relative" ref={dropdownRef}>
-          <button 
-            onClick={() => setShowDropdown(!showDropdown)}
-            className="hidden sm:flex items-center justify-center px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium rounded-lg transition-colors shadow-[0_0_15px_rgba(20,184,166,0.3)]"
-          >
-            <Plus className="w-4 h-4 mr-2" /> Quick Add
-          </button>
+          <div className="relative" ref={dropdownRef}>
+            <button 
+              onClick={() => setShowDropdown(!showDropdown)}
+              className="hidden sm:flex items-center justify-center px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium rounded-lg transition-colors shadow-[0_0_15px_rgba(20,184,166,0.3)]"
+            >
+              <Plus className="w-4 h-4 mr-2" /> Quick Add
+            </button>
 
-          <AnimatePresence>
-            {showDropdown && (
-              <motion.div 
-                initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                animate={{ opacity: 1, y: 0, scale: 1 }}
-                exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                transition={{ duration: 0.2 }}
-                className="absolute right-0 mt-2 w-48 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl shadow-xl overflow-hidden z-50"
-              >
-                <div className="py-1">
-                  <button onClick={() => handleQuickAdd('/leads')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
-                    <Users className="w-4 h-4 mr-3 text-[var(--color-accent)]" /> Add New Lead
-                  </button>
-                  <button onClick={() => handleQuickAdd('/tasks')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
-                    <CheckSquare className="w-4 h-4 mr-3 text-blue-400" /> Create Task
-                  </button>
-                  <button onClick={() => handleQuickAdd('/employees')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
-                    <Briefcase className="w-4 h-4 mr-3 text-purple-400" /> Add Employee
-                  </button>
-                </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </div>
+            <AnimatePresence>
+              {showDropdown && (
+                <motion.div 
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: 10, scale: 0.95 }}
+                  transition={{ duration: 0.2 }}
+                  className="absolute right-0 mt-2 w-48 bg-[var(--color-card-bg)] border border-[var(--color-border)] rounded-xl shadow-xl overflow-hidden z-50"
+                >
+                  <div className="py-1">
+                    <button onClick={() => handleQuickAdd('/leads')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
+                      <Users className="w-4 h-4 mr-3 text-[var(--color-accent)]" /> Add New Lead
+                    </button>
+                    <button onClick={() => handleQuickAdd('/tasks')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
+                      <CheckSquare className="w-4 h-4 mr-3 text-blue-400" /> Create Task
+                    </button>
+                    <button onClick={() => handleQuickAdd('/employees')} className="w-full px-4 py-2.5 text-sm text-left text-[var(--color-text-primary)] hover:bg-[var(--color-primary-bg)] flex items-center transition-colors">
+                      <Briefcase className="w-4 h-4 mr-3 text-purple-400" /> Add Employee
+                    </button>
+                  </div>
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </div>
         )}
       </div>
     </header>
