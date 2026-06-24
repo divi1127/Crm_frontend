@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Search, Plus, Mail, Shield, X, Edit, Trash2, Copy, CheckCircle } from 'lucide-react';
+import { Search, Plus, Mail, Shield, X, Edit, Trash2, Copy, CheckCircle, Eye, EyeOff } from 'lucide-react';
 import api from '../utils/api';
 
 const EmployeeAccounts = () => {
@@ -9,6 +9,7 @@ const EmployeeAccounts = () => {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState(null);
+  const [showPassword, setShowPassword] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [successMessage, setSuccessMessage] = useState('');
   const [copiedId, setCopiedId] = useState(null);
@@ -54,7 +55,10 @@ const EmployeeAccounts = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
+    if (!isEdit && formData.password.length < 6) {
+      alert('Password must be at least 6 characters.');
+      return;
+    }
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
 
@@ -332,15 +336,21 @@ const EmployeeAccounts = () => {
                   <label className="block text-sm font-medium text-[var(--color-text-secondary)] mb-1.5">
                     Password {isEdit && '(Leave empty to keep current)'}
                   </label>
+                <div className="relative">
                   <input
-                    type="password"
+                    type={showPassword ? 'text' : 'password'}
                     name="password"
                     value={formData.password}
                     onChange={handleChange}
                     required={!isEdit}
-                    className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none"
-                    placeholder="Enter secure password"
+                    minLength={isEdit ? undefined : 6}
+                    className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none pr-10"
+                    placeholder={isEdit ? 'Leave empty to keep current' : 'Min 6 characters'}
                   />
+                  <button type="button" onClick={() => setShowPassword(!showPassword)} className="absolute right-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] hover:text-white transition-colors">
+                    {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                  </button>
+                </div>
                 </div>
 
                 <div>

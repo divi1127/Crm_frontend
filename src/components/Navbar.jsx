@@ -9,9 +9,15 @@ const Navbar = () => {
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
   const [theme, setTheme] = useState(localStorage.getItem('theme') || 'dark');
+  const [isAdmin, setIsAdmin] = useState(false);
   const dropdownRef = useRef(null);
   const notifRef = useRef(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if (userInfo?.role === 'Admin') setIsAdmin(true);
+  }, []);
 
   // Apply theme to document element
   useEffect(() => {
@@ -208,7 +214,8 @@ const Navbar = () => {
           </AnimatePresence>
         </div>
 
-        {/* Quick Add Dropdown */}
+        {/* Quick Add Dropdown - Admin only */}
+        {isAdmin && (
         <div className="relative" ref={dropdownRef}>
           <button 
             onClick={() => setShowDropdown(!showDropdown)}
@@ -241,6 +248,7 @@ const Navbar = () => {
             )}
           </AnimatePresence>
         </div>
+        )}
       </div>
     </header>
   );

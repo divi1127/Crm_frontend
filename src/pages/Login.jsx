@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ChevronRight, Globe } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import FaceLoginVerify from '../components/FaceLoginVerify';
 import jodLogo from '../assets/jod.jpeg';
+
+const NO_FACE_ROLES = ['HR', 'MD'];
 
 const slides = [
   {
@@ -49,11 +51,14 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
     setLoading(true);
-
     try {
       const { data } = await api.post('/api/auth/login', { email, password });
-      if (data.role === 'Admin') {
+      if (data.role === 'Admin' || NO_FACE_ROLES.includes(data.role)) {
         localStorage.setItem('userInfo', JSON.stringify(data));
         navigate('/dashboard');
         return;
@@ -223,16 +228,16 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="relative group">
               <input 
-                type="email" required value={email} onChange={(e) => setEmail(e.target.value)}
-                placeholder="Email address" 
+                type="text" required value={email} onChange={(e) => setEmail(e.target.value)}
+                placeholder="Email or Username" 
                 className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-slate-700 focus:outline-none focus:border-violet-500/40 focus:bg-white/[0.06] transition-all text-sm"
               />
             </div>
 
             <div className="relative group">
               <input 
-                type={showPassword ? "text" : "password"} required value={password} onChange={(e) => setPassword(e.target.value)}
-                placeholder="Password" 
+                type={showPassword ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password (min 6 characters)" 
                 className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-slate-700 focus:outline-none focus:border-violet-500/40 focus:bg-white/[0.06] transition-all text-sm"
               />
               <button 

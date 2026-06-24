@@ -20,14 +20,14 @@ const Attendance = () => {
   });
 
   const [isAdmin, setIsAdmin] = useState(false);
+  const [isHRorMD, setIsHRorMD] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showFaceCheckIn, setShowFaceCheckIn] = useState(false);
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if (userInfo && userInfo.role === 'Admin') {
-      setIsAdmin(true);
-    }
+    if (userInfo?.role === 'Admin') setIsAdmin(true);
+    if (userInfo?.role === 'HR' || userInfo?.role === 'MD') setIsHRorMD(true);
     fetchData(userInfo);
   }, []);
 
@@ -178,13 +178,15 @@ const Attendance = () => {
           {/* Show check-in/out and apply leave to authenticated users; admin keeps manual log button */}
           {localStorage.getItem('userInfo') && (
             <>
-              {/* Face Check-In button */}
-              <button
-                onClick={() => setShowFaceCheckIn(true)}
-                className="flex items-center px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/25 hover:bg-purple-500/20 text-sm font-medium rounded-lg transition-colors"
-              >
-                <Scan className="w-4 h-4 mr-2" /> Face Check-In
-              </button>
+              {/* Face Check-In only for non-HR/MD roles */}
+              {!isHRorMD && (
+                <button
+                  onClick={() => setShowFaceCheckIn(true)}
+                  className="flex items-center px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/25 hover:bg-purple-500/20 text-sm font-medium rounded-lg transition-colors"
+                >
+                  <Scan className="w-4 h-4 mr-2" /> Face Check-In
+                </button>
+              )}
               <button onClick={async () => { await handleCheckIn(); }} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
                 <Plus className="w-4 h-4 mr-2" /> Check In
               </button>
@@ -196,7 +198,7 @@ const Attendance = () => {
               </button>
             </>
           )}
-          {isAdmin && (
+          {(isAdmin || isHRorMD) && (
             <>
               <button onClick={() => setShowAddModal(true)} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
                 <Plus className="w-4 h-4 mr-2" /> Log Attendance
@@ -252,7 +254,7 @@ const Attendance = () => {
                     <th className="px-6 py-4 font-medium">Check Out</th>
                     <th className="px-6 py-4 font-medium">Type</th>
                     <th className="px-6 py-4 font-medium">Status</th>
-                    {isAdmin && <th className="px-6 py-4 font-medium text-right">Action</th>}
+                    {(isAdmin || isHRorMD) && <th className="px-6 py-4 font-medium text-right">Action</th>}
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-[var(--color-border)]">
@@ -264,7 +266,7 @@ const Attendance = () => {
                       <td className="px-6 py-4 text-white">{row.checkOut || '-'}</td>
                       <td className="px-6 py-4 text-[var(--color-text-secondary)]">{row.type}</td>
                       <td className="px-6 py-4">{getStatusBadge(row.status)}</td>
-                      {isAdmin && (
+                      {(isAdmin || isHRorMD) && (
                         <td className="px-6 py-4 text-right">
                           <button onClick={() => handleDeleteAttendance(row.id)} className="p-1.5 bg-red-500/10 text-red-400 rounded-lg border border-red-500/15 opacity-0 group-hover:opacity-100 transition-all"><Trash2 className="w-3.5 h-3.5"/></button>
                         </td>
@@ -294,14 +296,14 @@ const Attendance = () => {
                   <p className="text-xs text-[var(--color-text-secondary)] mb-1">{req.type} Leave ({req.reason})</p>
                   <p className="text-xs text-[var(--color-text-secondary)] mb-3">{req.startDate} to {req.endDate}</p>
                   
-                  {req.status === 'Pending' && isAdmin && (
+                  {req.status === 'Pending' && (isAdmin || isHRorMD) && (
                     <div className="flex gap-2 mt-2">
                       <button onClick={() => handleApproveLeave(req.id, 'Approved')} className="flex-1 py-1.5 bg-teal-500/20 hover:bg-teal-500/30 text-teal-400 text-xs font-medium rounded border border-teal-500/20 transition-colors">Approve</button>
                       <button onClick={() => handleApproveLeave(req.id, 'Rejected')} className="flex-1 py-1.5 bg-red-500/20 hover:bg-red-500/30 text-red-400 text-xs font-medium rounded border border-red-500/20 transition-colors">Reject</button>
                     </div>
                   )}
 
-                  {isAdmin && (
+                  {(isAdmin || isHRorMD) && (
                     <button onClick={() => handleDeleteLeave(req.id)} className="absolute right-2 bottom-2 p-1.5 text-red-400 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><Trash2 className="w-3.5 h-3.5"/></button>
                   )}
                 </div>
