@@ -31,14 +31,10 @@ const ProtectedRoute = ({ children }) => {
 // Protected Route for Admin only
 const AdminProtectedRoute = ({ children }) => {
   const userInfo = localStorage.getItem('userInfo');
-  if (!userInfo) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!userInfo) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(userInfo);
-    if (user.role !== 'Admin') {
-      return <Navigate to="/dashboard" replace />;
-    }
+    if (user.role !== 'Admin') return <Navigate to="/dashboard" replace />;
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
@@ -48,15 +44,10 @@ const AdminProtectedRoute = ({ children }) => {
 // Protected Route for Leads access (Admin or Marketing)
 const MarketingProtectedRoute = ({ children }) => {
   const userInfo = localStorage.getItem('userInfo');
-  if (!userInfo) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!userInfo) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(userInfo);
-    const hasLeadsAccess = user.role === 'Admin' || user.role === 'Marketing';
-    if (!hasLeadsAccess) {
-      return <Navigate to="/dashboard" replace />;
-    }
+    if (user.role !== 'Admin' && user.role !== 'Marketing') return <Navigate to="/dashboard" replace />;
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
@@ -66,15 +57,23 @@ const MarketingProtectedRoute = ({ children }) => {
 // Protected Route for Developer access
 const DeveloperProtectedRoute = ({ children }) => {
   const userInfo = localStorage.getItem('userInfo');
-  if (!userInfo) {
-    return <Navigate to="/login" replace />;
-  }
+  if (!userInfo) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(userInfo);
-    const hasDeveloperAccess = user.role === 'Admin' || user.role === 'Developer';
-    if (!hasDeveloperAccess) {
-      return <Navigate to="/dashboard" replace />;
-    }
+    if (user.role !== 'Admin' && user.role !== 'Developer') return <Navigate to="/dashboard" replace />;
+  } catch (e) {
+    return <Navigate to="/login" replace />;
+  }
+  return children;
+};
+
+// Protected Route for MD access (Admin + MD)
+const MDProtectedRoute = ({ children }) => {
+  const userInfo = localStorage.getItem('userInfo');
+  if (!userInfo) return <Navigate to="/login" replace />;
+  try {
+    const user = JSON.parse(userInfo);
+    if (user.role !== 'Admin' && user.role !== 'MD') return <Navigate to="/dashboard" replace />;
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
@@ -122,7 +121,7 @@ function App() {
           <Route path="history"           element={<AdminProtectedRoute><SalesHistory /></AdminProtectedRoute>} />
           <Route path="tasks"             element={<AdminProtectedRoute><Tasks /></AdminProtectedRoute>} />
           <Route path="employee-accounts" element={<AdminProtectedRoute><EmployeeAccounts /></AdminProtectedRoute>} />
-          <Route path="reports"           element={<AdminProtectedRoute><Reports /></AdminProtectedRoute>} />
+          <Route path="reports"           element={<MDProtectedRoute><Reports /></MDProtectedRoute>} />
           <Route path="settings"          element={<AdminProtectedRoute><Settings /></AdminProtectedRoute>} />
         </Route>
 

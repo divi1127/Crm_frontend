@@ -58,6 +58,34 @@ const developerNavItems = [
   { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
 ];
 
+// HR nav items
+const hrNavItems = [
+  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { path: '/my-tasks',    label: 'My Tasks',     icon: CheckSquare },
+  { path: '/employees',   label: 'Employees',    icon: Briefcase },
+  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
+  { path: '/work-update', label: 'Work Update',  icon: ClipboardList },
+];
+
+// MD nav items
+const mdNavItems = [
+  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { path: '/clients',     label: 'Clients',      icon: Building },
+  { path: '/projects',    label: 'Projects',     icon: FolderKanban },
+  { path: '/employees',   label: 'Employees',    icon: Briefcase },
+  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
+  { path: '/reports',     label: 'Reports',      icon: BarChart3 },
+];
+
+// General Employee nav items
+const employeeNavItems = [
+  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
+  { path: '/my-tasks',    label: 'My Tasks',     icon: CheckSquare },
+  { path: '/projects',    label: 'Projects',     icon: FolderKanban },
+  { path: '/work-update', label: 'Work Update',  icon: ClipboardList },
+  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
+];
+
 const Sidebar = ({ isOpen, setIsOpen }) => {
   const [user, setUser] = useState({ name: 'User', role: 'Developer' });
   const navigate = useNavigate();
@@ -72,6 +100,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   const isAdmin = user.role === 'Admin';
   const filteredNavItems = isAdmin ? adminNavItems
     : user.role === 'Marketing' ? marketingNavItems
+    : user.role === 'HR' ? hrNavItems
+    : user.role === 'MD' ? mdNavItems
+    : user.role === 'Employee' ? employeeNavItems
     : developerNavItems;
 
   const handleLogout = async () => {
@@ -159,11 +190,12 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
                 {user.role === 'Admin' ? '🛡️ Admin Panel' : '👤 Employee Panel'}
               </p>
               <p className={`text-xs font-bold px-2 py-1 rounded ${
-                user.role === 'Admin'
-                  ? 'bg-red-500/20 text-red-400'
-                  : user.role === 'Developer'
-                  ? 'bg-blue-500/20 text-blue-400'
-                  : 'bg-purple-500/20 text-purple-400'
+                user.role === 'Admin' ? 'bg-red-500/20 text-red-400'
+                : user.role === 'Developer' ? 'bg-blue-500/20 text-blue-400'
+                : user.role === 'HR' ? 'bg-yellow-500/20 text-yellow-400'
+                : user.role === 'MD' ? 'bg-red-500/20 text-red-400'
+                : user.role === 'Marketing' ? 'bg-purple-500/20 text-purple-400'
+                : 'bg-teal-500/20 text-teal-400'
               }`}>
                 {user.role}
               </p>

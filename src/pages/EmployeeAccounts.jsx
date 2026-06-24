@@ -18,7 +18,7 @@ const EmployeeAccounts = () => {
     email: '',
     username: '',
     password: '',
-    role: 'Developer',
+    role: 'Employee',
     specialization: ''
   });
 
@@ -99,7 +99,7 @@ const EmployeeAccounts = () => {
       email: emp.email || '',
       username: emp.username || '',
       password: '',
-      role: emp.role || 'Developer',
+      role: emp.role || 'Employee',
       specialization: emp.specialization || ''
     });
     setShowModal(true);
@@ -111,7 +111,7 @@ const EmployeeAccounts = () => {
       email: '',
       username: '',
       password: '',
-      role: 'Developer',
+      role: 'Employee',
       specialization: ''
     });
     setIsEdit(false);
@@ -142,7 +142,7 @@ const EmployeeAccounts = () => {
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h1 className="text-2xl font-bold text-white mb-1">Employee Login Accounts</h1>
-          <p className="text-[var(--color-text-secondary)] text-sm">Create and manage employee login credentials (Developer & Marketing roles)</p>
+          <p className="text-[var(--color-text-secondary)] text-sm">Create and manage employee login credentials</p>
         </div>
         <motion.button
           whileHover={{ scale: 1.05 }}
@@ -227,11 +227,11 @@ const EmployeeAccounts = () => {
                   <td className="py-3 px-3 text-white font-mono text-xs bg-white/5 px-2 py-1 rounded w-fit">{emp.username || '—'}</td>
                   <td className="py-3 px-3">
                     <span className={`px-3 py-1 rounded-full text-xs font-medium ${
-                      emp.role === 'Developer' 
-                        ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
-                        : emp.role === 'Marketing'
-                        ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
-                        : 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20'
+                      emp.role === 'Developer' ? 'bg-blue-500/10 text-blue-400 border border-blue-500/20'
+                      : emp.role === 'Marketing' ? 'bg-purple-500/10 text-purple-400 border border-purple-500/20'
+                      : emp.role === 'HR' ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/20'
+                      : emp.role === 'MD' ? 'bg-red-500/10 text-red-400 border border-red-500/20'
+                      : 'bg-[var(--color-accent)]/10 text-[var(--color-accent)] border border-[var(--color-accent)]/20'
                     }`}>
                       {emp.role}
                     </span>
@@ -351,8 +351,11 @@ const EmployeeAccounts = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none"
                   >
+                    <option value="Employee" className="bg-[#1E293B]">Employee</option>
                     <option value="Developer" className="bg-[#1E293B]">Developer</option>
                     <option value="Marketing" className="bg-[#1E293B]">Marketing</option>
+                    <option value="HR" className="bg-[#1E293B]">HR</option>
+                    <option value="MD" className="bg-[#1E293B]">MD</option>
                   </select>
                 </div>
 

@@ -179,8 +179,15 @@ const Login = () => {
 
           {/* Quick Access Toggles (Centered) */}
           <div className="flex gap-2 mb-10 p-1.5 bg-white/5 rounded-2xl w-fit border border-white/5 mx-auto">
-            {['Admin', 'Marketing', 'Developer'].map((label) => {
-              const emailMap = { Admin: 'admin@crm.io', Marketing: 'marketing@crm.io', Developer: 'developer@crm.io' };
+            {['Admin', 'Marketing', 'Developer', 'HR', 'MD', 'Employee'].map((label) => {
+              const emailMap = { 
+                Admin: 'admin@crm.io', 
+                Marketing: 'marketing@crm.io', 
+                Developer: 'developer@crm.io',
+                HR: 'hr@crm.io',
+                MD: 'md@crm.io',
+                Employee: 'employee@crm.io'
+              };
               const isSelected = activeTab === label;
               return (
                 <button
