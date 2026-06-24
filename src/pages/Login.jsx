@@ -183,7 +183,7 @@ const Login = () => {
           </header>
 
           {/* Quick Access Toggles (Centered) */}
-          <div className="flex gap-2 mb-10 p-1.5 bg-white/5 rounded-2xl w-fit border border-white/5 mx-auto">
+          <div className="grid grid-cols-3 gap-2 mb-10 p-1.5 bg-white/5 rounded-2xl border border-white/5 mx-auto w-fit">
             {['Admin', 'Marketing', 'Developer', 'HR', 'MD', 'Employee'].map((label) => {
               const emailMap = { 
                 Admin: 'admin@crm.io', 
