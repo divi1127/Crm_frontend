@@ -56,6 +56,8 @@ const Dashboard = () => {
   });
   // For employee dashboard: their own tasks
   const [myTasks, setMyTasks] = useState([]);
+  const [showLeadModal, setShowLeadModal] = useState(false);
+  const [leadForm, setLeadForm] = useState({ name: '', company: '', email: '', phone: '', leadSource: 'Organic', status: 'New' });
   const navigate = useNavigate();
 
   const fetchDashboardData = async () => {
@@ -139,6 +141,20 @@ const Dashboard = () => {
     }
   };
 
+  const handleSaveLead = async (e) => {
+    e.preventDefault();
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      await api.post('/api/leads', leadForm, config);
+      setShowLeadModal(false);
+      setLeadForm({ name: '', company: '', email: '', phone: '', leadSource: 'Organic', status: 'New' });
+      fetchDashboardData();
+    } catch (error) {
+      alert(error.response?.data?.message || 'Error saving lead.');
+    }
+  };
+
   const { stats, chartData, recentActivities, salesDeals } = dashboardData;
 
   if (loading) {
@@ -166,9 +182,16 @@ const Dashboard = () => {
           <h1 className="text-xl sm:text-2xl font-bold text-white mb-1">Dashboard Overview</h1>
           <p className="text-[var(--color-text-secondary)] text-sm">{getRoleMessage()}</p>
         </div>
-        <button onClick={() => exportToExcel(recentActivities, 'Recent_Activities')} className="px-3 py-2 text-xs sm:text-sm bg-white/5 text-white rounded-lg border border-[var(--color-border)] hover:bg-white/10 transition-colors whitespace-nowrap">
-          Export to Excel
-        </button>
+        <div className="flex gap-2">
+          {userRole === 'Marketing' && (
+            <button onClick={() => setShowLeadModal(true)} className="flex items-center px-3 py-2 text-xs sm:text-sm bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white rounded-lg transition-colors whitespace-nowrap">
+              <Plus className="w-4 h-4 mr-1" /> Add Lead
+            </button>
+          )}
+          <button onClick={() => exportToExcel(recentActivities, 'Recent_Activities')} className="px-3 py-2 text-xs sm:text-sm bg-white/5 text-white rounded-lg border border-[var(--color-border)] hover:bg-white/10 transition-colors whitespace-nowrap">
+            Export to Excel
+          </button>
+        </div>
       </div>
 
       {/* Top Stats */}
@@ -420,6 +443,59 @@ const Dashboard = () => {
           </div>
         </motion.div>
       )}
+
+      {/* Quick Add Lead Modal (Marketing) */}
+      <AnimatePresence>
+        {showLeadModal && (
+          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
+            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card w-full max-w-md p-6 relative">
+              <button onClick={() => setShowLeadModal(false)} className="absolute top-4 right-4 text-[var(--color-text-secondary)] hover:text-white"><X className="w-5 h-5"/></button>
+              <h2 className="text-xl font-bold text-white mb-6">Add New Lead</h2>
+              <form onSubmit={handleSaveLead} className="space-y-4">
+                <div>
+                  <label className="text-sm text-[var(--color-text-secondary)]">Full Name *</label>
+                  <input type="text" required value={leadForm.name} onChange={e => setLeadForm({...leadForm, name: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
+                </div>
+                <div>
+                  <label className="text-sm text-[var(--color-text-secondary)]">Email *</label>
+                  <input type="email" required value={leadForm.email} onChange={e => setLeadForm({...leadForm, email: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
+                </div>
+                <div>
+                  <label className="text-sm text-[var(--color-text-secondary)]">Company</label>
+                  <input type="text" value={leadForm.company} onChange={e => setLeadForm({...leadForm, company: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
+                </div>
+                <div>
+                  <label className="text-sm text-[var(--color-text-secondary)]">Phone</label>
+                  <input type="tel" value={leadForm.phone} onChange={e => setLeadForm({...leadForm, phone: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
+                </div>
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <label className="text-sm text-[var(--color-text-secondary)]">Source</label>
+                    <select value={leadForm.leadSource} onChange={e => setLeadForm({...leadForm, leadSource: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]">
+                      <option value="Organic" className="bg-[#1E293B]">Organic</option>
+                      <option value="Social" className="bg-[#1E293B]">Social</option>
+                      <option value="Referral" className="bg-[#1E293B]">Referral</option>
+                      <option value="Direct" className="bg-[#1E293B]">Direct</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label className="text-sm text-[var(--color-text-secondary)]">Status</label>
+                    <select value={leadForm.status} onChange={e => setLeadForm({...leadForm, status: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]">
+                      <option value="New" className="bg-[#1E293B]">New</option>
+                      <option value="Contacted" className="bg-[#1E293B]">Contacted</option>
+                      <option value="Qualified" className="bg-[#1E293B]">Qualified</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="pt-2 flex justify-end gap-3">
+                  <button type="button" onClick={() => setShowLeadModal(false)} className="px-4 py-2 bg-[var(--color-primary-bg)] text-white font-medium rounded-lg border border-[var(--color-border)]">Cancel</button>
+                  <button type="submit" className="px-6 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-medium rounded-lg transition-colors">Save Lead</button>
+                </div>
+              </form>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
 
       {/* Add / Edit Deal Modal */}
       <AnimatePresence>
