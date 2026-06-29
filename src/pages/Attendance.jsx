@@ -23,6 +23,7 @@ const Attendance = () => {
   const [isHRorMD, setIsHRorMD] = useState(false);
   const [loading, setLoading] = useState(true);
   const [showFaceCheckIn, setShowFaceCheckIn] = useState(false);
+  const [checkInMessage, setCheckInMessage] = useState('');
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -95,15 +96,20 @@ const Attendance = () => {
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkin', {}, config);
-      // Replace existing record for same day if it exists, else prepend
       setAttendances(prev => {
         const exists = prev.some(a => a.id === data.id);
         if (exists) return prev.map(a => a.id === data.id ? data : a);
         return [data, ...prev];
       });
+      setCheckInMessage('');
       alert('✓ Checked in at ' + data.checkIn + ' (IST)');
     } catch (error) {
-      alert(error.response?.data?.message || 'Failed to check in.');
+      const msg = error.response?.data?.message || '';
+      if (msg === 'Already checked in for today') {
+        setCheckInMessage('Already checked in today');
+      } else {
+        alert(msg || 'Failed to check in.');
+      }
     }
   };
 
@@ -190,6 +196,11 @@ const Attendance = () => {
               <button onClick={async () => { await handleCheckIn(); }} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
                 <Plus className="w-4 h-4 mr-2" /> Check In
               </button>
+              {checkInMessage && (
+                <span className="flex items-center gap-1 text-yellow-400 bg-yellow-400/10 border border-yellow-400/20 px-3 py-2 rounded-lg text-sm">
+                  <AlertCircle className="w-4 h-4" /> {checkInMessage}
+                </span>
+              )}
               <button onClick={async () => { await handleCheckOut(); }} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
                 <Clock className="w-4 h-4 mr-2" /> Check Out
               </button>

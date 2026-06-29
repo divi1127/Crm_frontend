@@ -28,26 +28,26 @@ const ProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Protected Route for Admin only
+// Protected Route for Admin/HR/MD only
 const AdminProtectedRoute = ({ children }) => {
   const userInfo = localStorage.getItem('userInfo');
   if (!userInfo) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(userInfo);
-    if (user.role !== 'Admin') return <Navigate to="/dashboard" replace />;
+    if (!['Admin', 'HR', 'MD'].includes(user.role)) return <Navigate to="/dashboard" replace />;
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
   return children;
 };
 
-// Protected Route for Leads access (Admin or Marketing)
+// Protected Route for Leads access (Admin, HR, MD or Marketing)
 const MarketingProtectedRoute = ({ children }) => {
   const userInfo = localStorage.getItem('userInfo');
   if (!userInfo) return <Navigate to="/login" replace />;
   try {
     const user = JSON.parse(userInfo);
-    if (user.role !== 'Admin' && user.role !== 'Marketing') return <Navigate to="/dashboard" replace />;
+    if (!['Admin', 'HR', 'MD', 'Marketing'].includes(user.role)) return <Navigate to="/dashboard" replace />;
   } catch (e) {
     return <Navigate to="/login" replace />;
   }
@@ -67,18 +67,7 @@ const DeveloperProtectedRoute = ({ children }) => {
   return children;
 };
 
-// Protected Route for MD access (Admin + MD)
-const MDProtectedRoute = ({ children }) => {
-  const userInfo = localStorage.getItem('userInfo');
-  if (!userInfo) return <Navigate to="/login" replace />;
-  try {
-    const user = JSON.parse(userInfo);
-    if (user.role !== 'Admin' && user.role !== 'MD') return <Navigate to="/dashboard" replace />;
-  } catch (e) {
-    return <Navigate to="/login" replace />;
-  }
-  return children;
-};
+
 
 // If already logged in, prevent accessing auth pages
 const PublicRoute = ({ children }) => {
@@ -121,7 +110,7 @@ function App() {
           <Route path="history"           element={<AdminProtectedRoute><SalesHistory /></AdminProtectedRoute>} />
           <Route path="tasks"             element={<AdminProtectedRoute><Tasks /></AdminProtectedRoute>} />
           <Route path="employee-accounts" element={<AdminProtectedRoute><EmployeeAccounts /></AdminProtectedRoute>} />
-          <Route path="reports"           element={<MDProtectedRoute><Reports /></MDProtectedRoute>} />
+          <Route path="reports"           element={<AdminProtectedRoute><Reports /></AdminProtectedRoute>} />
           <Route path="settings"          element={<AdminProtectedRoute><Settings /></AdminProtectedRoute>} />
         </Route>
 

@@ -58,24 +58,9 @@ const developerNavItems = [
   { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
 ];
 
-// HR nav items
-const hrNavItems = [
-  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
-  { path: '/my-tasks',    label: 'My Tasks',     icon: CheckSquare },
-  { path: '/employees',   label: 'Employees',    icon: Briefcase },
-  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
-  { path: '/work-update', label: 'Work Update',  icon: ClipboardList },
-];
-
-// MD nav items
-const mdNavItems = [
-  { path: '/dashboard',   label: 'Dashboard',    icon: LayoutDashboard },
-  { path: '/clients',     label: 'Clients',      icon: Building },
-  { path: '/projects',    label: 'Projects',     icon: FolderKanban },
-  { path: '/employees',   label: 'Employees',    icon: Briefcase },
-  { path: '/attendance',  label: 'Attendance',   icon: CalendarCheck },
-  { path: '/reports',     label: 'Reports',      icon: BarChart3 },
-];
+// HR and MD nav items — same as Admin (all modules)
+const hrNavItems = adminNavItems;
+const mdNavItems = adminNavItems;
 
 // General Employee nav items
 const employeeNavItems = [
@@ -97,11 +82,9 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     }
   }, []);
 
-  const isAdmin = user.role === 'Admin';
+  const isAdmin = user.role === 'Admin' || user.role === 'HR' || user.role === 'MD';
   const filteredNavItems = isAdmin ? adminNavItems
     : user.role === 'Marketing' ? marketingNavItems
-    : user.role === 'HR' ? hrNavItems
-    : user.role === 'MD' ? mdNavItems
     : user.role === 'Employee' ? employeeNavItems
     : developerNavItems;
 
@@ -187,7 +170,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
           <div className="mt-4 pt-4 border-t border-[var(--color-border)]">
             <div className="px-3 py-2 bg-white/5 border border-[var(--color-border)] rounded-lg text-center">
               <p className="text-xs text-[var(--color-text-secondary)] mb-1">
-                {user.role === 'Admin' ? '🛡️ Admin Panel' : '👤 Employee Panel'}
+                {(user.role === 'Admin' || user.role === 'HR' || user.role === 'MD') ? '🛡️ Admin Panel' : '👤 Employee Panel'}
               </p>
               <p className={`text-xs font-bold px-2 py-1 rounded ${
                 user.role === 'Admin' ? 'bg-red-500/20 text-red-400'
