@@ -29,7 +29,8 @@ const Clients = () => {
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if (userInfo && userInfo.role === 'Admin') {
+    const adminRoles = ['Admin', 'HR', 'MD'];
+    if (userInfo && adminRoles.includes(userInfo.role)) {
       setIsAdmin(true);
     }
     fetchClients(userInfo);

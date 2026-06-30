@@ -48,6 +48,9 @@ const Dashboard = () => {
   const [loading, setLoading] = useState(true);
   const [userRole, setUserRole] = useState('Developer');
   const [userName, setUserName] = useState('User');
+
+  // Roles with full admin-level access
+  const isAdminRole = ['Admin', 'HR', 'MD'].includes(userRole);
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [editId, setEditId] = useState(null);
@@ -79,8 +82,8 @@ const Dashboard = () => {
     if (userInfo) {
       setUserRole(userInfo.role);
       setUserName(userInfo.name);
-      // For non-admin users, also fetch their tasks
-      if (userInfo.role !== 'Admin') {
+      // For non-admin-role users, also fetch their tasks
+      if (!['Admin', 'HR', 'MD'].includes(userInfo.role)) {
         fetchMyTasks(userInfo);
       }
     }
@@ -164,14 +167,12 @@ const Dashboard = () => {
   // Get role-appropriate welcome message and visible modules
   const getRoleMessage = () => {
     switch(userRole) {
-      case 'Admin':
-        return `Welcome back, ${userName}! You have full access to all CRM modules.`;
-      case 'Developer':
-        return `Welcome back, ${userName}! Here's your development dashboard with projects and tasks.`;
-      case 'Marketing':
-        return `Welcome back, ${userName}! Here's your marketing dashboard with leads and follow-ups.`;
-      default:
-        return `Welcome back, ${userName}!`;
+      case 'Admin': return `Welcome back, ${userName}! You have full access to all CRM modules.`;
+      case 'HR':    return `Welcome back, ${userName}! Here's your HR dashboard with full data access.`;
+      case 'MD':    return `Welcome back, ${userName}! Here's your management dashboard with full data access.`;
+      case 'Developer': return `Welcome back, ${userName}! Here's your development dashboard with projects and tasks.`;
+      case 'Marketing': return `Welcome back, ${userName}! Here's your marketing dashboard with leads and follow-ups.`;
+      default: return `Welcome back, ${userName}!`;
     }
   };
 
@@ -183,7 +184,7 @@ const Dashboard = () => {
           <p className="text-[var(--color-text-secondary)] text-sm">{getRoleMessage()}</p>
         </div>
         <div className="flex gap-2">
-          {userRole === 'Marketing' && (
+          {(isAdminRole || userRole === 'Marketing') && (
             <button onClick={() => setShowLeadModal(true)} className="flex items-center px-3 py-2 text-xs sm:text-sm bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white rounded-lg transition-colors whitespace-nowrap">
               <Plus className="w-4 h-4 mr-1" /> Add Lead
             </button>
@@ -194,18 +195,18 @@ const Dashboard = () => {
         </div>
       </div>
 
-      {/* Top Stats */}
+      {/* Top Stats — all shown for Admin/HR/MD, partial for others */}
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-6 gap-3">
-        {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Total Leads" value={stats.totalLeads} increase="12.5%" icon={Users} delay={0.1} />}
-        {userRole !== 'Developer' && <StatCard title="Total Clients" value={stats.totalClients || 0} increase="4.8%" icon={Building} delay={0.15} />}
+        {(isAdminRole || userRole === 'Marketing') && <StatCard title="Total Leads" value={stats.totalLeads} increase="12.5%" icon={Users} delay={0.1} />}
+        {(isAdminRole || userRole !== 'Developer') && <StatCard title="Total Clients" value={stats.totalClients || 0} increase="4.8%" icon={Building} delay={0.15} />}
         <StatCard title="Active Projects" value={stats.totalProjects || 0} increase="10.2%" icon={FolderKanban} delay={0.2} />
-        {(userRole === 'Admin' || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${Number(stats.salesRevenue||0).toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
-        {userRole === 'Admin' && <StatCard title="Employees" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
+        {(isAdminRole || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${Number(stats.salesRevenue||0).toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
+        {isAdminRole && <StatCard title="Employees" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
         <StatCard title="Pending Tasks" value={stats.pendingTasks} increase="18.3%" icon={CheckSquare} delay={0.35} />
       </div>
 
-      {/* Employee-specific: My Assigned Tasks quick panel */}
-      {userRole !== 'Admin' && (
+      {/* My Tasks panel — only for non-admin roles */}
+      {!isAdminRole && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -286,7 +287,7 @@ const Dashboard = () => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 0.5 }}
-          className={`glass-card p-4 sm:p-6 ${(userRole === 'Admin' || userRole === 'Marketing') ? 'lg:col-span-2' : 'lg:col-span-3'}`}
+          className={`glass-card p-4 sm:p-6 ${(isAdminRole || userRole === 'Marketing') ? 'lg:col-span-2' : 'lg:col-span-3'}`}
         >
           <div className="flex justify-between items-center mb-6">
             <h3 className="text-lg font-bold text-white">Revenue & Leads</h3>
@@ -313,8 +314,8 @@ const Dashboard = () => {
           </div>
         </motion.div>
 
-        {/* Secondary Chart */}
-        {(userRole === 'Admin' || userRole === 'Marketing') && (
+        {/* Lead Conversion chart — admin roles + marketing */}
+        {(isAdminRole || userRole === 'Marketing') && (
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -354,7 +355,7 @@ const Dashboard = () => {
             <h3 className="text-base sm:text-lg font-bold text-white">Sales Pipeline</h3>
             <p className="text-xs sm:text-sm text-[var(--color-text-secondary)]">Active deals and revenue forecasting</p>
           </div>
-          {userRole === 'Admin' && (
+          {isAdminRole && (
             <button onClick={() => { setIsEdit(false); setFormData({ client: '', amount: '', stage: 'Negotiation', probability: 50 }); setShowModal(true); }} className="flex items-center px-3 py-1.5 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-xs font-semibold rounded-lg transition-all">
               <Plus className="w-3.5 h-3.5 mr-1" /> Add Deal
             </button>
@@ -382,7 +383,7 @@ const Dashboard = () => {
                   <span>{deal.probability}%</span>
                 </div>
 
-                {userRole === 'Admin' && (
+                {isAdminRole && (
                   <div className="flex gap-2 justify-end mt-3 pt-3 border-t border-[var(--color-border)]/40 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button onClick={() => handleEditClick(deal)} className="p-1 text-blue-400 hover:text-blue-500 hover:bg-blue-500/10 rounded transition-colors"><Edit className="w-3.5 h-3.5"/></button>
                     <button onClick={() => handleDeleteDeal(deal.id)} className="p-1 text-red-400 hover:text-red-500 hover:bg-red-500/10 rounded transition-colors"><Trash2 className="w-3.5 h-3.5"/></button>
@@ -394,8 +395,8 @@ const Dashboard = () => {
         )}
       </motion.div>
 
-      {/* Recent Activities Table */}
-      {(userRole === 'Admin' || userRole === 'Marketing') && (
+      {/* Recent Leads Table — admin roles + marketing */}
+      {(isAdminRole || userRole === 'Marketing') && (
         <motion.div 
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

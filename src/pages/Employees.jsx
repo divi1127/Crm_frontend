@@ -25,14 +25,14 @@ const Employees = () => {
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if (userInfo && userInfo.role === 'Admin') {
+    const adminRoles = ['Admin', 'HR', 'MD'];
+    if (userInfo && adminRoles.includes(userInfo.role)) {
       setIsAdmin(true);
       if (location.search.includes('add=true')) {
         setShowModal(true);
         setIsEdit(false);
         navigate('/employees', { replace: true });
       }
-      // fetch face registration status for all users
       fetchFaceStatus(userInfo);
     }
     fetchEmployees(userInfo);

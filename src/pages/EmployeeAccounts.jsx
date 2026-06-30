@@ -25,7 +25,8 @@ const EmployeeAccounts = () => {
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-    if (userInfo?.role !== 'Admin') {
+    const adminRoles = ['Admin', 'HR', 'MD'];
+    if (!userInfo || !adminRoles.includes(userInfo.role)) {
       window.location.href = '/login';
       return;
     }
