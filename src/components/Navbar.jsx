@@ -1,10 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Bell, Search, Plus, Users, CheckSquare, Briefcase, Sun, Moon } from 'lucide-react';
+import { Bell, Search, Plus, Users, CheckSquare, Briefcase, Sun, Moon, Menu } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
 import api from '../utils/api';
 
-const Navbar = () => {
+const Navbar = ({ onMenuClick }) => {
   const [showDropdown, setShowDropdown] = useState(false);
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
   const [notifications, setNotifications] = useState([]);
@@ -144,6 +144,14 @@ const Navbar = () => {
   return (
     <header className="h-16 flex items-center justify-between px-4 lg:px-6 border-b border-[var(--color-border)] bg-[var(--color-secondary-bg)] z-10 sticky top-0 transition-colors duration-300">
       <div className="flex items-center gap-3">
+        {/* Mobile Hamburger */}
+        <button
+          onClick={onMenuClick}
+          className="md:hidden p-2 rounded-lg text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-colors"
+        >
+          <Menu className="w-5 h-5" />
+        </button>
+
         {/* Search Bar */}
         <div className="hidden md:flex relative group">
           <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-text-secondary)] group-focus-within:text-[var(--color-accent)] transition-colors" />

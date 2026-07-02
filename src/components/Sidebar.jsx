@@ -127,7 +127,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
       <div className="flex items-center h-16 border-b border-[var(--color-border)] px-3 gap-2">
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
+          className="hidden md:flex p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-white hover:bg-white/5 transition-colors flex-shrink-0"
         >
           <Menu className="w-5 h-5" />
         </button>
