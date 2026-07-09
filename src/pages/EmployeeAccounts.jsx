@@ -19,7 +19,7 @@ const EmployeeAccounts = () => {
     email: '',
     username: '',
     password: '',
-    role: 'Employee',
+    role: 'Developer',
     specialization: ''
   });
 
@@ -105,7 +105,7 @@ const EmployeeAccounts = () => {
       email: emp.email || '',
       username: emp.username || '',
       password: '',
-      role: emp.role || 'Employee',
+      role: emp.role || 'Developer',
       specialization: emp.specialization || ''
     });
     setShowModal(true);
@@ -117,7 +117,7 @@ const EmployeeAccounts = () => {
       email: '',
       username: '',
       password: '',
-      role: 'Employee',
+      role: 'Developer',
       specialization: ''
     });
     setIsEdit(false);
@@ -363,7 +363,6 @@ const EmployeeAccounts = () => {
                     onChange={handleChange}
                     className="w-full px-4 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white focus:border-[var(--color-accent)] outline-none"
                   >
-                    <option value="Employee" className="bg-[#1E293B]">Employee</option>
                     <option value="Developer" className="bg-[#1E293B]">Developer</option>
                     <option value="Marketing" className="bg-[#1E293B]">Marketing</option>
                     <option value="HR" className="bg-[#1E293B]">HR</option>
