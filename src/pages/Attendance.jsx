@@ -172,22 +172,29 @@ const Attendance = () => {
     }
   };
 
+  const filteredAttendances = useMemo(() => {
+    if (!showCalc || (!calcName && !calcFrom && !calcTo)) return attendances;
+    return attendances.filter(a => {
+      const nameMatch = (isAdmin || isHRorMD || currentUser?.role === 'Developer') 
+        ? (calcName ? a.employeeName.toLowerCase().includes(calcName.toLowerCase()) : true) 
+        : true;
+      const fromMatch = calcFrom ? a.date >= calcFrom : true;
+      const toMatch = calcTo ? a.date <= calcTo : true;
+      return nameMatch && fromMatch && toMatch;
+    });
+  }, [attendances, calcName, calcFrom, calcTo, isAdmin, isHRorMD, currentUser, showCalc]);
+
   // Calculator result
   const calcResult = useMemo(() => {
-    if (!calcName || !calcFrom || !calcTo) return null;
-    const filtered = attendances.filter(a => {
-      const nameMatch = (isAdmin || isHRorMD) ? a.employeeName.toLowerCase().includes(calcName.toLowerCase()) : true;
-      return nameMatch && a.date >= calcFrom && a.date <= calcTo;
-    });
+    if (!showCalc || (!calcName && !calcFrom && !calcTo)) return null;
     return {
-      total: filtered.length,
-      present: filtered.filter(a => a.status === 'Present').length,
-      late: filtered.filter(a => a.status === 'Late').length,
-      absent: filtered.filter(a => a.status === 'Absent').length,
-      leftEarly: filtered.filter(a => a.status === 'Left Early').length,
-      leave: filtered.filter(a => a.status === 'Leave').length,
+      total: filteredAttendances.length,
+      present: filteredAttendances.filter(a => a.status === 'Present').length,
+      late: filteredAttendances.filter(a => a.status === 'Late').length,
+      leave: filteredAttendances.filter(a => a.status === 'Leave').length,
+      leftEarly: filteredAttendances.filter(a => a.status === 'Left Early').length,
     };
-  }, [attendances, calcName, calcFrom, calcTo, isAdmin, isHRorMD]);
+  }, [filteredAttendances, showCalc, calcName, calcFrom, calcTo]);
 
   const handleMarkAbsent = async () => {
     if (!window.confirm('Mark all employees with no check-in today as Absent?')) return;
@@ -206,9 +213,8 @@ const Attendance = () => {
     switch (status) {
       case 'Present':   return <span className="flex items-center gap-1 text-teal-400 bg-teal-400/10 px-2 py-1 rounded text-xs border border-teal-400/20"><CheckCircle2 className="w-3 h-3"/> Present</span>;
       case 'Late':      return <span className="flex items-center gap-1 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded text-xs border border-yellow-400/20"><AlertCircle className="w-3 h-3"/> Late</span>;
-      case 'Absent':    return <span className="flex items-center gap-1 text-red-400 bg-red-400/10 px-2 py-1 rounded text-xs border border-red-400/20"><XCircle className="w-3 h-3"/> Absent</span>;
+      case 'Leave':    return <span className="flex items-center gap-1 text-red-400 bg-red-400/10 px-2 py-1 rounded text-xs border border-red-400/20"><XCircle className="w-3 h-3"/> Leave</span>;
       case 'Left Early':return <span className="flex items-center gap-1 text-orange-400 bg-orange-400/10 px-2 py-1 rounded text-xs border border-orange-400/20"><Clock className="w-3 h-3"/> Left Early</span>;
-      case 'Leave':     return <span className="flex items-center gap-1 text-blue-400 bg-blue-400/10 px-2 py-1 rounded text-xs border border-blue-400/20"><Calendar className="w-3 h-3"/> Leave</span>;
       default: return <span className="text-xs text-[var(--color-text-secondary)]">{status || '-'}</span>;
     }
   };
@@ -252,9 +258,6 @@ const Attendance = () => {
           )}
           {(isAdmin || isHRorMD) && (
             <>
-              <button onClick={() => setShowAddModal(true)} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
-                <Plus className="w-4 h-4 mr-2" /> Log Attendance
-              </button>
               <button onClick={handleMarkAbsent} className="flex items-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/25 hover:bg-red-500/20 text-sm font-medium rounded-lg transition-colors">
                 <XCircle className="w-4 h-4 mr-2" /> Mark Absent
               </button>
@@ -269,7 +272,7 @@ const Attendance = () => {
           <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-5">
             <h3 className="font-bold text-white mb-4 flex items-center gap-2"><Calculator className="w-4 h-4 text-blue-400"/> Attendance Calculator</h3>
             <div className="flex flex-wrap gap-4 items-end">
-              {(isAdmin || isHRorMD) && (
+              {(isAdmin || isHRorMD || currentUser?.role === 'Developer') && (
                 <div>
                   <label className="text-xs text-[var(--color-text-secondary)] font-medium block mb-1">Employee Name</label>
                   <input type="text" placeholder="Search name..." value={calcName} onChange={e => setCalcName(e.target.value)}
@@ -293,9 +296,8 @@ const Attendance = () => {
                   { label: 'Total Days', value: calcResult.total, color: 'text-white' },
                   { label: 'Present', value: calcResult.present, color: 'text-teal-400' },
                   { label: 'Late', value: calcResult.late, color: 'text-yellow-400' },
-                  { label: 'Absent', value: calcResult.absent, color: 'text-red-400' },
+                  { label: 'Leave', value: calcResult.leave, color: 'text-red-400' },
                   { label: 'Left Early', value: calcResult.leftEarly, color: 'text-orange-400' },
-                  { label: 'Leave', value: calcResult.leave, color: 'text-blue-400' },
                 ].map(s => (
                   <div key={s.label} className="bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg px-4 py-3 text-center min-w-[90px]">
                     <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
@@ -358,7 +360,7 @@ const Attendance = () => {
                   </tr>
                 </thead>
                 <tbody className="text-sm divide-y divide-[var(--color-border)]">
-                  {attendances.map((row) => (
+                  {filteredAttendances.map((row) => (
                     <tr key={row.id} className="hover:bg-white/5 transition-colors group">
                       <td className="px-6 py-4 text-white font-medium">{row.employeeName}</td>
                       <td className="px-6 py-4 text-[var(--color-text-secondary)]">{row.date}</td>
@@ -413,58 +415,7 @@ const Attendance = () => {
         </div>
       </div>
 
-      {/* Log Attendance Modal */}
-      <AnimatePresence>
-        {showAddModal && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-            <motion.div initial={{ opacity: 0, scale: 0.95 }} animate={{ opacity: 1, scale: 1 }} exit={{ opacity: 0, scale: 0.95 }} className="glass-card w-full max-w-md p-6 relative">
-              <button onClick={() => setShowAddModal(false)} className="absolute top-4 right-4 text-[var(--color-text-secondary)] hover:text-white"><X className="w-5 h-5"/></button>
-              <h2 className="text-xl font-bold text-white mb-6">Log Employee Attendance</h2>
-              <form onSubmit={handleSaveAttendance} className="space-y-4">
-                <div>
-                  <label className="text-sm text-[var(--color-text-secondary)] font-medium">Employee Name *</label>
-                  <input type="text" required value={attendanceForm.employeeName} onChange={e => setAttendanceForm({...attendanceForm, employeeName: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
-                </div>
-                <div>
-                  <label className="text-sm text-[var(--color-text-secondary)] font-medium">Date *</label>
-                  <input type="date" required value={attendanceForm.date} onChange={e => setAttendanceForm({...attendanceForm, date: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm text-[var(--color-text-secondary)] font-medium">Check In</label>
-                    <input type="time" value={attendanceForm.checkIn} onChange={e => setAttendanceForm({...attendanceForm, checkIn: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
-                  </div>
-                  <div>
-                    <label className="text-sm text-[var(--color-text-secondary)] font-medium">Check Out</label>
-                    <input type="time" value={attendanceForm.checkOut} onChange={e => setAttendanceForm({...attendanceForm, checkOut: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]" />
-                  </div>
-                </div>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <label className="text-sm text-[var(--color-text-secondary)] font-medium">Type</label>
-                    <select value={attendanceForm.type} onChange={e => setAttendanceForm({...attendanceForm, type: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]">
-                      <option value="Office" className="bg-[#1E293B] text-white">Office</option>
-                      <option value="Remote" className="bg-[#1E293B] text-white">Remote</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label className="text-sm text-[var(--color-text-secondary)] font-medium">Status</label>
-                    <select value={attendanceForm.status} onChange={e => setAttendanceForm({...attendanceForm, status: e.target.value})} className="w-full mt-1 px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white outline-none focus:border-[var(--color-accent)]">
-                      <option value="Present" className="bg-[#1E293B] text-white">Present</option>
-                      <option value="Late" className="bg-[#1E293B] text-white">Late</option>
-                      <option value="Absent" className="bg-[#1E293B] text-white">Absent</option>
-                    </select>
-                  </div>
-                </div>
-                <div className="pt-4 flex justify-end gap-3">
-                  <button type="button" onClick={() => setShowAddModal(false)} className="px-4 py-2 bg-[var(--color-primary-bg)] text-white font-medium rounded-lg border border-[var(--color-border)]">Cancel</button>
-                  <button type="submit" className="px-6 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white font-medium rounded-lg transition-colors">Log Data</button>
-                </div>
-              </form>
-            </motion.div>
-          </div>
-        )}
-      </AnimatePresence>
+
 
       {/* Apply Leave Modal */}
       <AnimatePresence>

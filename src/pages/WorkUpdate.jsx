@@ -406,6 +406,7 @@ const WorkUpdate = () => {
                 value={formData.update11AM}
                 onChange={(e) => !savedSlots.slot11AM && setFormData({ ...formData, update11AM: e.target.value })}
                 readOnly={savedSlots.slot11AM}
+                disabled={savedSlots.slot11AM}
                 placeholder={savedSlots.slot11AM ? 'This slot is locked after submission.' : 'Write the work you have completed...'}
                 rows={4}
                 className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
@@ -451,6 +452,7 @@ const WorkUpdate = () => {
                 value={formData.update3PM}
                 onChange={(e) => !savedSlots.slot3PM && setFormData({ ...formData, update3PM: e.target.value })}
                 readOnly={savedSlots.slot3PM || !savedSlots.slot11AM}
+                disabled={savedSlots.slot3PM}
                 placeholder={savedSlots.slot3PM ? 'This slot is locked after submission.' : 'Write the work you have completed...'}
                 rows={4}
                 className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
@@ -500,6 +502,7 @@ const WorkUpdate = () => {
                     value={formData.update630PM_completed}
                     onChange={(e) => !savedSlots.slot630PM && setFormData({ ...formData, update630PM_completed: e.target.value })}
                     readOnly={savedSlots.slot630PM || !savedSlots.slot3PM}
+                    disabled={savedSlots.slot630PM}
                     placeholder={savedSlots.slot630PM ? 'Locked.' : 'Write the work you have completed today...'}
                     rows={3}
                     className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
@@ -515,9 +518,12 @@ const WorkUpdate = () => {
                       value={formData.update630PM_pending}
                       onChange={(e) => setFormData({ ...formData, update630PM_pending: e.target.value })}
                       readOnly={!savedSlots.slot3PM}
+                      disabled={savedSlots.slot630PM}
                       placeholder="Write the pending work..."
                       rows={3}
-                      className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
+                      className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                        savedSlots.slot630PM ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70' : 'bg-white/5 border-[var(--color-border)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                      }`}
                     />
                   </div>
                   <div>
@@ -526,9 +532,12 @@ const WorkUpdate = () => {
                       value={formData.update630PM_tomorrow}
                       onChange={(e) => setFormData({ ...formData, update630PM_tomorrow: e.target.value })}
                       readOnly={!savedSlots.slot3PM}
+                      disabled={savedSlots.slot630PM}
                       placeholder="Write tomorrow continuation work..."
                       rows={3}
-                      className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
+                      className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                        savedSlots.slot630PM ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70' : 'bg-white/5 border-[var(--color-border)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                      }`}
                     />
                   </div>
                 </div>
@@ -539,9 +548,12 @@ const WorkUpdate = () => {
                     value={formData.update630PM_issues}
                     onChange={(e) => setFormData({ ...formData, update630PM_issues: e.target.value })}
                     readOnly={!savedSlots.slot3PM}
+                    disabled={savedSlots.slot630PM}
                     placeholder="Write any issues or blockers faced..."
                     rows={3}
-                    className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
+                    className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                      savedSlots.slot630PM ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70' : 'bg-white/5 border-[var(--color-border)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    }`}
                   />
                 </div>
               </div>
