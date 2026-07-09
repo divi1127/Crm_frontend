@@ -202,7 +202,7 @@ const Dashboard = () => {
         <StatCard title="Active Projects" value={stats.totalProjects || 0} increase="10.2%" icon={FolderKanban} delay={0.2} />
         {(isAdminRole || userRole === 'Marketing') && <StatCard title="Sales Revenue" value={`₹${Number(stats.salesRevenue||0).toLocaleString('en-IN')}`} increase="8.2%" icon={DollarSign} delay={0.25} />}
         {isAdminRole && <StatCard title="Employees" value={stats.employeeCount} increase="2.1%" icon={Briefcase} delay={0.3} />}
-        <StatCard title="Pending Tasks" value={stats.pendingTasks} increase="18.3%" icon={CheckSquare} delay={0.35} />
+        <StatCard title="Pending Tasks" value={isAdminRole ? stats.pendingTasks : myTasks.filter(t => t.status === 'todo').length} increase="18.3%" icon={CheckSquare} delay={0.35} />
       </div>
 
       {/* My Tasks panel — only for non-admin roles */}

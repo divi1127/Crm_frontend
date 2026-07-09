@@ -137,6 +137,9 @@ const Tasks = () => {
     }
   };
 
+  const pendingCount = tasks.filter(t => t.status === 'todo').length;
+  const inProgressCount = tasks.filter(t => t.status === 'inProgress').length;
+
   return (
     <div className="space-y-6 flex flex-col h-full">
       <div className="flex justify-between items-center">
@@ -159,6 +162,27 @@ const Tasks = () => {
           </button>
         </div>
       </div>
+
+      {/* Pending task summary */}
+      {!loading && tasks.length > 0 && (
+        <div className="flex flex-wrap gap-3">
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-500/10 border border-blue-500/20 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-blue-500"></span>
+            <span className="text-sm text-white font-semibold">{pendingCount}</span>
+            <span className="text-sm text-[var(--color-text-secondary)]">Pending (To Do)</span>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-yellow-500/10 border border-yellow-500/20 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-yellow-500"></span>
+            <span className="text-sm text-white font-semibold">{inProgressCount}</span>
+            <span className="text-sm text-[var(--color-text-secondary)]">In Progress</span>
+          </div>
+          <div className="flex items-center gap-2 px-4 py-2 bg-teal-500/10 border border-teal-500/20 rounded-lg">
+            <span className="w-2 h-2 rounded-full bg-teal-500"></span>
+            <span className="text-sm text-white font-semibold">{tasks.filter(t => t.status === 'completed').length}</span>
+            <span className="text-sm text-[var(--color-text-secondary)]">Completed</span>
+          </div>
+        </div>
+      )}
 
       {loading ? (
         <div className="text-center text-white py-10">Loading tasks...</div>

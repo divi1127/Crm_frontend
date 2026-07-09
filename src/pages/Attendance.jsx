@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Clock, Calendar, CheckCircle2, XCircle, AlertCircle, Download, Plus, X, Trash2, Edit, Scan } from 'lucide-react';
+import { Clock, Calendar, CheckCircle2, XCircle, AlertCircle, Download, Plus, X, Trash2, Scan, Calculator } from 'lucide-react';
 import api from '../utils/api';
 import { exportToExcel } from '../utils/exportToExcel';
 import FaceCheckIn from '../components/FaceCheckIn';
@@ -10,7 +10,11 @@ const Attendance = () => {
   const [leaveRequests, setLeaveRequests] = useState([]);
   const [showAddModal, setShowAddModal] = useState(false);
   const [showLeaveModal, setShowLeaveModal] = useState(false);
-  
+  const [showCalc, setShowCalc] = useState(false);
+  const [calcName, setCalcName] = useState('');
+  const [calcFrom, setCalcFrom] = useState('');
+  const [calcTo, setCalcTo] = useState('');
+
   // Forms state
   const [attendanceForm, setAttendanceForm] = useState({
     employeeName: '', date: '', checkIn: '', checkOut: '', type: 'Office', status: 'Present'
@@ -21,15 +25,22 @@ const Attendance = () => {
 
   const [isAdmin, setIsAdmin] = useState(false);
   const [isHRorMD, setIsHRorMD] = useState(false);
+  const [currentUser, setCurrentUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showFaceCheckIn, setShowFaceCheckIn] = useState(false);
   const [checkInMessage, setCheckInMessage] = useState('');
 
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    setCurrentUser(userInfo);
     if (userInfo?.role === 'Admin') setIsAdmin(true);
     if (userInfo?.role === 'HR' || userInfo?.role === 'MD') setIsHRorMD(true);
     fetchData(userInfo);
+    // Non-admin: pre-fill calculator with own name
+    const adminRoles = ['Admin', 'HR', 'MD'];
+    if (userInfo && !adminRoles.includes(userInfo.role)) {
+      setCalcName(userInfo.name || '');
+    }
   }, []);
 
   // Auto-fill forms with current user info when available
@@ -161,12 +172,44 @@ const Attendance = () => {
     }
   };
 
+  // Calculator result
+  const calcResult = useMemo(() => {
+    if (!calcName || !calcFrom || !calcTo) return null;
+    const filtered = attendances.filter(a => {
+      const nameMatch = (isAdmin || isHRorMD) ? a.employeeName.toLowerCase().includes(calcName.toLowerCase()) : true;
+      return nameMatch && a.date >= calcFrom && a.date <= calcTo;
+    });
+    return {
+      total: filtered.length,
+      present: filtered.filter(a => a.status === 'Present').length,
+      late: filtered.filter(a => a.status === 'Late').length,
+      absent: filtered.filter(a => a.status === 'Absent').length,
+      leftEarly: filtered.filter(a => a.status === 'Left Early').length,
+      leave: filtered.filter(a => a.status === 'Leave').length,
+    };
+  }, [attendances, calcName, calcFrom, calcTo, isAdmin, isHRorMD]);
+
+  const handleMarkAbsent = async () => {
+    if (!window.confirm('Mark all employees with no check-in today as Absent?')) return;
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+      const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
+      const { data } = await api.post('/api/attendances/mark-absent', {}, config);
+      alert(data.message);
+      fetchData(userInfo);
+    } catch (error) {
+      alert(error.response?.data?.message || 'Failed to mark absent.');
+    }
+  };
+
   const getStatusBadge = (status) => {
     switch (status) {
-      case 'Present': return <span className="flex items-center gap-1 text-teal-400 bg-teal-400/10 px-2 py-1 rounded text-xs border border-teal-400/20"><CheckCircle2 className="w-3 h-3"/> Present</span>;
-      case 'Late': return <span className="flex items-center gap-1 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded text-xs border border-yellow-400/20"><AlertCircle className="w-3 h-3"/> Late</span>;
-      case 'Absent': return <span className="flex items-center gap-1 text-red-400 bg-red-400/10 px-2 py-1 rounded text-xs border border-red-400/20"><XCircle className="w-3 h-3"/> Absent</span>;
-      default: return null;
+      case 'Present':   return <span className="flex items-center gap-1 text-teal-400 bg-teal-400/10 px-2 py-1 rounded text-xs border border-teal-400/20"><CheckCircle2 className="w-3 h-3"/> Present</span>;
+      case 'Late':      return <span className="flex items-center gap-1 text-yellow-400 bg-yellow-400/10 px-2 py-1 rounded text-xs border border-yellow-400/20"><AlertCircle className="w-3 h-3"/> Late</span>;
+      case 'Absent':    return <span className="flex items-center gap-1 text-red-400 bg-red-400/10 px-2 py-1 rounded text-xs border border-red-400/20"><XCircle className="w-3 h-3"/> Absent</span>;
+      case 'Left Early':return <span className="flex items-center gap-1 text-orange-400 bg-orange-400/10 px-2 py-1 rounded text-xs border border-orange-400/20"><Clock className="w-3 h-3"/> Left Early</span>;
+      case 'Leave':     return <span className="flex items-center gap-1 text-blue-400 bg-blue-400/10 px-2 py-1 rounded text-xs border border-blue-400/20"><Calendar className="w-3 h-3"/> Leave</span>;
+      default: return <span className="text-xs text-[var(--color-text-secondary)]">{status || '-'}</span>;
     }
   };
 
@@ -177,23 +220,21 @@ const Attendance = () => {
           <h1 className="text-2xl font-bold text-white mb-1">Attendance Management</h1>
           <p className="text-[var(--color-text-secondary)] text-sm">Monitor employee attendance and leave requests.</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button onClick={() => exportToExcel(attendances, 'Attendance_Data')} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
             <Download className="w-4 h-4 mr-2" /> Export
           </button>
-          {/* Show check-in/out and apply leave to authenticated users; admin keeps manual log button */}
+          <button onClick={() => setShowCalc(v => !v)} className="flex items-center px-4 py-2 bg-blue-500/10 text-blue-400 border border-blue-500/25 hover:bg-blue-500/20 text-sm font-medium rounded-lg transition-colors">
+            <Calculator className="w-4 h-4 mr-2" /> Calculator
+          </button>
           {localStorage.getItem('userInfo') && (
             <>
-              {/* Face Check-In only for non-HR/MD roles */}
               {!isHRorMD && (
-                <button
-                  onClick={() => setShowFaceCheckIn(true)}
-                  className="flex items-center px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/25 hover:bg-purple-500/20 text-sm font-medium rounded-lg transition-colors"
-                >
+                <button onClick={() => setShowFaceCheckIn(true)} className="flex items-center px-4 py-2 bg-purple-500/10 text-purple-400 border border-purple-500/25 hover:bg-purple-500/20 text-sm font-medium rounded-lg transition-colors">
                   <Scan className="w-4 h-4 mr-2" /> Face Check-In
                 </button>
               )}
-              <button onClick={async () => { await handleCheckIn(); }} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
+              <button onClick={handleCheckIn} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
                 <Plus className="w-4 h-4 mr-2" /> Check In
               </button>
               {checkInMessage && (
@@ -201,7 +242,7 @@ const Attendance = () => {
                   <AlertCircle className="w-4 h-4" /> {checkInMessage}
                 </span>
               )}
-              <button onClick={async () => { await handleCheckOut(); }} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
+              <button onClick={handleCheckOut} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
                 <Clock className="w-4 h-4 mr-2" /> Check Out
               </button>
               <button onClick={() => setShowLeaveModal(true)} className="flex items-center px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium rounded-lg transition-colors shadow-[0_0_15px_rgba(20,184,166,0.3)]">
@@ -214,17 +255,65 @@ const Attendance = () => {
               <button onClick={() => setShowAddModal(true)} className="flex items-center px-4 py-2 bg-teal-500/10 text-teal-400 border border-teal-500/25 hover:bg-teal-500/20 text-sm font-medium rounded-lg transition-colors">
                 <Plus className="w-4 h-4 mr-2" /> Log Attendance
               </button>
+              <button onClick={handleMarkAbsent} className="flex items-center px-4 py-2 bg-red-500/10 text-red-400 border border-red-500/25 hover:bg-red-500/20 text-sm font-medium rounded-lg transition-colors">
+                <XCircle className="w-4 h-4 mr-2" /> Mark Absent
+              </button>
             </>
           )}
         </div>
       </div>
 
+      {/* Attendance Calculator Panel */}
+      <AnimatePresence>
+        {showCalc && (
+          <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -10 }} className="glass-card p-5">
+            <h3 className="font-bold text-white mb-4 flex items-center gap-2"><Calculator className="w-4 h-4 text-blue-400"/> Attendance Calculator</h3>
+            <div className="flex flex-wrap gap-4 items-end">
+              {(isAdmin || isHRorMD) && (
+                <div>
+                  <label className="text-xs text-[var(--color-text-secondary)] font-medium block mb-1">Employee Name</label>
+                  <input type="text" placeholder="Search name..." value={calcName} onChange={e => setCalcName(e.target.value)}
+                    className="px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white text-sm outline-none focus:border-[var(--color-accent)] w-48" />
+                </div>
+              )}
+              <div>
+                <label className="text-xs text-[var(--color-text-secondary)] font-medium block mb-1">From Date</label>
+                <input type="date" value={calcFrom} onChange={e => setCalcFrom(e.target.value)}
+                  className="px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white text-sm outline-none focus:border-[var(--color-accent)]" />
+              </div>
+              <div>
+                <label className="text-xs text-[var(--color-text-secondary)] font-medium block mb-1">To Date</label>
+                <input type="date" value={calcTo} onChange={e => setCalcTo(e.target.value)}
+                  className="px-3 py-2 bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg text-white text-sm outline-none focus:border-[var(--color-accent)]" />
+              </div>
+            </div>
+            {calcResult && (
+              <div className="mt-4 flex flex-wrap gap-3">
+                {[
+                  { label: 'Total Days', value: calcResult.total, color: 'text-white' },
+                  { label: 'Present', value: calcResult.present, color: 'text-teal-400' },
+                  { label: 'Late', value: calcResult.late, color: 'text-yellow-400' },
+                  { label: 'Absent', value: calcResult.absent, color: 'text-red-400' },
+                  { label: 'Left Early', value: calcResult.leftEarly, color: 'text-orange-400' },
+                  { label: 'Leave', value: calcResult.leave, color: 'text-blue-400' },
+                ].map(s => (
+                  <div key={s.label} className="bg-[var(--color-primary-bg)] border border-[var(--color-border)] rounded-lg px-4 py-3 text-center min-w-[90px]">
+                    <p className={`text-2xl font-bold ${s.color}`}>{s.value}</p>
+                    <p className="text-xs text-[var(--color-text-secondary)] mt-1">{s.label}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* Stats Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
         {[
           { label: 'Logged Records', value: attendances.length, icon: <Clock className="w-5 h-5 text-blue-400" /> },
-          { label: 'Present Logged', value: attendances.filter(a => a.status === 'Present').length, icon: <CheckCircle2 className="w-5 h-5 text-teal-400" /> },
-          { label: 'Late Logged', value: attendances.filter(a => a.status === 'Late').length, icon: <AlertCircle className="w-5 h-5 text-yellow-400" /> },
+          { label: 'Present Today', value: attendances.filter(a => a.status === 'Present' || a.status === 'Late').length, icon: <CheckCircle2 className="w-5 h-5 text-teal-400" /> },
+          { label: 'Late / Left Early', value: attendances.filter(a => a.status === 'Late' || a.status === 'Left Early').length, icon: <AlertCircle className="w-5 h-5 text-yellow-400" /> },
           { label: 'Pending Leaves', value: leaveRequests.filter(l => l.status === 'Pending').length, icon: <XCircle className="w-5 h-5 text-red-400" /> },
         ].map((stat, i) => (
           <motion.div 

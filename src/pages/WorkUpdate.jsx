@@ -38,6 +38,9 @@ const WorkUpdate = () => {
     update630PM_issues: ''
   });
 
+  // Track which slots are already saved/locked
+  const [savedSlots, setSavedSlots] = useState({ slot11AM: false, slot3PM: false, slot630PM: false });
+
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
@@ -69,6 +72,10 @@ const WorkUpdate = () => {
       const { data } = await api.get(`/api/work-updates/my?date=${date}`, config);
       
       if (data) {
+        const s11 = !!data.update11AM;
+        const s3  = !!data.update3PM;
+        const s6  = !!data.update630PM_completed;
+        setSavedSlots({ slot11AM: s11, slot3PM: s3, slot630PM: s6 });
         setFormData({
           update11AM: data.update11AM || '',
           update3PM: data.update3PM || '',
@@ -78,6 +85,7 @@ const WorkUpdate = () => {
           update630PM_issues: data.update630PM_issues || ''
         });
       } else {
+        setSavedSlots({ slot11AM: false, slot3PM: false, slot630PM: false });
         setFormData({
           update11AM: '',
           update3PM: '',
@@ -147,6 +155,8 @@ const WorkUpdate = () => {
       };
 
       await api.post('/api/work-updates/my', payload, config);
+      // After submit, re-fetch to get locked state from server
+      await fetchMyUpdate(selectedDate);
       setMessage({ type: 'success', text: 'Daily work update submitted successfully!' });
       
       // Auto dismiss success message after 3 seconds
@@ -370,7 +380,7 @@ const WorkUpdate = () => {
           {/* Form container */}
           <form onSubmit={handleSubmit} className="space-y-6">
             
-            {/* 11:00 AM Update Card (Blue Theme) */}
+            {/* 11:00 AM Update Card */}
             <div 
               ref={ref11am} 
               onClick={() => setActiveTab('11am')}
@@ -382,68 +392,105 @@ const WorkUpdate = () => {
                 <div className="p-2.5 rounded-xl bg-blue-500/10 text-blue-400">
                   <CloudSun className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-bold text-white">11:00 AM Update</h3>
                   <p className="text-xs text-[var(--color-text-secondary)]">What work completed from morning till now</p>
                 </div>
+                {savedSlots.slot11AM && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                    <CheckCircle className="w-3 h-3" /> Submitted & Locked
+                  </span>
+                )}
               </div>
               <textarea
                 value={formData.update11AM}
-                onChange={(e) => setFormData({ ...formData, update11AM: e.target.value })}
-                placeholder="Write the work you have completed..."
+                onChange={(e) => !savedSlots.slot11AM && setFormData({ ...formData, update11AM: e.target.value })}
+                readOnly={savedSlots.slot11AM}
+                placeholder={savedSlots.slot11AM ? 'This slot is locked after submission.' : 'Write the work you have completed...'}
                 rows={4}
-                className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 transition-all text-sm resize-y"
+                className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                  savedSlots.slot11AM
+                    ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70'
+                    : 'bg-white/5 border-[var(--color-border)] focus:border-blue-500 focus:ring-1 focus:ring-blue-500'
+                }`}
               />
-              <p className="text-xs text-[var(--color-text-secondary)] mt-2 font-medium">
-                Example: Login page UI completed, Database connection done
-              </p>
+              {!savedSlots.slot11AM && (
+                <p className="text-xs text-[var(--color-text-secondary)] mt-2 font-medium">
+                  Example: Login page UI completed, Database connection done
+                </p>
+              )}
             </div>
 
-            {/* 03:00 PM Update Card (Yellow/Orange Theme) */}
+            {/* 03:00 PM Update Card */}
             <div 
               ref={ref3pm} 
               onClick={() => setActiveTab('3pm')}
               className={`glass-card p-6 border-l-4 transition-all ${
                 activeTab === '3pm' ? 'border-l-amber-500 scale-[1.005] bg-amber-500/[0.02]' : 'border-l-amber-500/30'
+              } ${
+                !savedSlots.slot11AM ? 'opacity-50 pointer-events-none' : ''
               }`}
             >
               <div className="flex items-center gap-3 mb-4">
                 <div className="p-2.5 rounded-xl bg-amber-500/10 text-amber-400">
                   <Sun className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-bold text-white">03:00 PM Update</h3>
-                  <p className="text-xs text-[var(--color-text-secondary)]">What work completed after morning update</p>
+                  <p className="text-xs text-[var(--color-text-secondary)]">
+                    {!savedSlots.slot11AM ? 'Submit 11 AM update first to unlock this slot' : 'What work completed after morning update'}
+                  </p>
                 </div>
+                {savedSlots.slot3PM && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                    <CheckCircle className="w-3 h-3" /> Submitted & Locked
+                  </span>
+                )}
               </div>
               <textarea
                 value={formData.update3PM}
-                onChange={(e) => setFormData({ ...formData, update3PM: e.target.value })}
-                placeholder="Write the work you have completed..."
+                onChange={(e) => !savedSlots.slot3PM && setFormData({ ...formData, update3PM: e.target.value })}
+                readOnly={savedSlots.slot3PM || !savedSlots.slot11AM}
+                placeholder={savedSlots.slot3PM ? 'This slot is locked after submission.' : 'Write the work you have completed...'}
                 rows={4}
-                className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-amber-500 focus:ring-1 focus:ring-amber-500 transition-all text-sm resize-y"
+                className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                  savedSlots.slot3PM
+                    ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70'
+                    : 'bg-white/5 border-[var(--color-border)] focus:border-amber-500 focus:ring-1 focus:ring-amber-500'
+                }`}
               />
-              <p className="text-xs text-[var(--color-text-secondary)] mt-2 font-medium">
-                Example: Dashboard API integrated, Fixed sidebar responsive issue
-              </p>
+              {savedSlots.slot11AM && !savedSlots.slot3PM && (
+                <p className="text-xs text-[var(--color-text-secondary)] mt-2 font-medium">
+                  Example: Dashboard API integrated, Fixed sidebar responsive issue
+                </p>
+              )}
             </div>
 
-            {/* 06:30 PM Final Update Card (Green Theme) */}
+            {/* 06:30 PM Final Update Card */}
             <div 
               ref={ref630pm} 
               onClick={() => setActiveTab('630pm')}
               className={`glass-card p-6 border-l-4 transition-all ${
                 activeTab === '630pm' ? 'border-l-emerald-500 scale-[1.005] bg-emerald-500/[0.02]' : 'border-l-emerald-500/30'
+              } ${
+                !savedSlots.slot3PM ? 'opacity-50 pointer-events-none' : ''
               }`}
             >
               <div className="flex items-center gap-3 mb-6">
                 <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-400">
                   <Moon className="w-5 h-5" />
                 </div>
-                <div>
+                <div className="flex-1">
                   <h3 className="text-lg font-bold text-white">06:30 PM Final Update</h3>
-                  <p className="text-xs text-[var(--color-text-secondary)]">Total completed works for today</p>
+                  <p className="text-xs text-[var(--color-text-secondary)]">
+                    {!savedSlots.slot3PM ? 'Submit 3 PM update first to unlock this slot' : 'Total completed works for today'}
+                  </p>
                 </div>
+                {savedSlots.slot630PM && (
+                  <span className="flex items-center gap-1 text-xs text-emerald-400 bg-emerald-500/10 border border-emerald-500/20 px-2 py-1 rounded-lg">
+                    <CheckCircle className="w-3 h-3" /> Submitted & Locked
+                  </span>
+                )}
               </div>
 
               <div className="space-y-4">
@@ -451,10 +498,13 @@ const WorkUpdate = () => {
                   <label className="block text-sm font-semibold text-white mb-2">Completed Work</label>
                   <textarea
                     value={formData.update630PM_completed}
-                    onChange={(e) => setFormData({ ...formData, update630PM_completed: e.target.value })}
-                    placeholder="Write the work you have completed today..."
+                    onChange={(e) => !savedSlots.slot630PM && setFormData({ ...formData, update630PM_completed: e.target.value })}
+                    readOnly={savedSlots.slot630PM || !savedSlots.slot3PM}
+                    placeholder={savedSlots.slot630PM ? 'Locked.' : 'Write the work you have completed today...'}
                     rows={3}
-                    className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
+                    className={`w-full p-3 border rounded-xl text-white outline-none transition-all text-sm resize-y ${
+                      savedSlots.slot630PM ? 'bg-white/[0.02] border-emerald-500/20 text-[var(--color-text-secondary)] cursor-not-allowed opacity-70' : 'bg-white/5 border-[var(--color-border)] focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500'
+                    }`}
                   />
                 </div>
 
@@ -464,6 +514,7 @@ const WorkUpdate = () => {
                     <textarea
                       value={formData.update630PM_pending}
                       onChange={(e) => setFormData({ ...formData, update630PM_pending: e.target.value })}
+                      readOnly={!savedSlots.slot3PM}
                       placeholder="Write the pending work..."
                       rows={3}
                       className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
@@ -474,6 +525,7 @@ const WorkUpdate = () => {
                     <textarea
                       value={formData.update630PM_tomorrow}
                       onChange={(e) => setFormData({ ...formData, update630PM_tomorrow: e.target.value })}
+                      readOnly={!savedSlots.slot3PM}
                       placeholder="Write tomorrow continuation work..."
                       rows={3}
                       className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
@@ -486,6 +538,7 @@ const WorkUpdate = () => {
                   <textarea
                     value={formData.update630PM_issues}
                     onChange={(e) => setFormData({ ...formData, update630PM_issues: e.target.value })}
+                    readOnly={!savedSlots.slot3PM}
                     placeholder="Write any issues or blockers faced..."
                     rows={3}
                     className="w-full p-3 bg-white/5 border border-[var(--color-border)] rounded-xl text-white outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 transition-all text-sm resize-y"
