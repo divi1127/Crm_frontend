@@ -259,7 +259,11 @@ const Login = () => {
         <FaceLoginVerify
           userInfo={pendingUser}
           onClose={() => { setShowFaceLogin(false); setPendingUser(null); }}
-          onSuccess={() => {
+          onSuccess={(data) => {
+            // Fresh check-in → skip the check-in alert toast on Dashboard
+            if (!data || !data.alreadyCheckedIn) {
+              sessionStorage.setItem('skipCheckinAlert', 'true');
+            }
             localStorage.setItem('userInfo', JSON.stringify(pendingUser));
             setPendingUser(null);
             setShowFaceLogin(false);

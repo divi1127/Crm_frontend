@@ -225,9 +225,14 @@ const FaceLoginVerify = ({ userInfo, onClose, onSuccess }) => {
       };
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkin', payload, config);
-      setSummary({ photo, location, time: now.toLocaleString(), record: data });
+      const alreadyIn = data && data.alreadyCheckedIn;
+      setSummary({ photo, location, time: alreadyIn ? `${data.checkIn} IST` : now.toLocaleString(), record: data });
       setStep('success');
-      setMessage('Face verified and attendance recorded. Redirecting to dashboard...');
+      if (alreadyIn) {
+        setMessage(`Face verified. You already checked in today at ${data.checkIn} IST.`);
+      } else {
+        setMessage('Face verified and attendance recorded. Redirecting to dashboard...');
+      }
       setTimeout(() => {
         onSuccess && onSuccess(data);
         cleanup();
