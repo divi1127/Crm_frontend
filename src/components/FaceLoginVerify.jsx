@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Camera, X, CheckCircle2, AlertCircle, Loader2, RefreshCw, ShieldCheck } from 'lucide-react';
 import api from '../utils/api';
-
-const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-const FACEAPI_CDN = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+import { ensureModels } from '../utils/faceApi';
 
 const euclideanDist = (a, b) => {
   let sum = 0;
@@ -36,28 +34,10 @@ const FaceLoginVerify = ({ userInfo, onClose, onSuccess }) => {
     };
   }, []);
 
-  const loadScript = (src) => new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const script = document.createElement('script');
-    script.src = src;
-    script.onload = resolve;
-    script.onerror = reject;
-    document.head.appendChild(script);
-  });
-
   const initRecognition = async () => {
     try {
-      if (!window.faceapi) {
-        setMessage('Loading face-api.js (first run may take ~10s)...');
-        await loadScript(FACEAPI_CDN);
-      }
-      const faceapi = window.faceapi;
-      setMessage('Loading recognition models...');
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-      ]);
+      setMessage('Loading face recognition models...');
+      const faceapi = await ensureModels();
 
       if (!userInfo || !userInfo.token) {
         setStep('error');

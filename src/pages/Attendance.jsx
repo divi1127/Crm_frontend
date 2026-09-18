@@ -125,8 +125,11 @@ const Attendance = () => {
   };
 
   const handleCheckOut = async () => {
+    const userInfo = JSON.parse(localStorage.getItem('userInfo'));
+    if (userInfo?.role === 'Developer' || userInfo?.role === 'Marketing') {
+      return alert('Manual check-out is disabled for Developer and Marketing roles. Automatic checkout & logout occurs at 6:00 PM.');
+    }
     try {
-      const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo) return alert('Please login first');
       const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
       const { data } = await api.post('/api/attendances/checkout', {}, config);
@@ -248,9 +251,15 @@ const Attendance = () => {
                   <AlertCircle className="w-4 h-4" /> {checkInMessage}
                 </span>
               )}
-              <button onClick={handleCheckOut} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
-                <Clock className="w-4 h-4 mr-2" /> Check Out
-              </button>
+              {(currentUser?.role === 'Developer' || currentUser?.role === 'Marketing') ? (
+                <div className="flex items-center px-3 py-2 bg-teal-500/10 border border-teal-500/20 text-teal-400 text-xs font-medium rounded-lg" title="Automatic checkout occurs at 6:00 PM">
+                  <Clock className="w-3.5 h-3.5 mr-1.5" /> Auto Check-Out at 6:00 PM
+                </div>
+              ) : (
+                <button onClick={handleCheckOut} className="flex items-center px-4 py-2 bg-white/5 border border-[var(--color-border)] hover:bg-white/10 text-white text-sm font-medium rounded-lg transition-colors">
+                  <Clock className="w-4 h-4 mr-2" /> Check Out
+                </button>
+              )}
               <button onClick={() => setShowLeaveModal(true)} className="flex items-center px-4 py-2 bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white text-sm font-medium rounded-lg transition-colors shadow-[0_0_15px_rgba(20,184,166,0.3)]">
                 <Calendar className="w-4 h-4 mr-2" /> Apply Leave
               </button>

@@ -89,6 +89,10 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     : developerNavItems;
 
   const handleLogout = async () => {
+    if (user.role === 'Developer' || user.role === 'Marketing') {
+      alert('Manual logout is disabled for Developer and Marketing roles. Automatic checkout & logout occurs at 6:00 PM.');
+      return;
+    }
     try {
       // Auto checkout on logout for non-admin employees
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
@@ -198,9 +202,15 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <p className="text-sm font-medium text-white truncate">{user.name}</p>
               <p className="text-xs text-[var(--color-text-secondary)] truncate">{user.role}</p>
             </div>
-            <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors flex-shrink-0">
-              <LogOut className="w-4 h-4" />
-            </button>
+            {!(user.role === 'Developer' || user.role === 'Marketing') ? (
+              <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors flex-shrink-0">
+                <LogOut className="w-4 h-4" />
+              </button>
+            ) : (
+              <span className="text-[10px] text-teal-400/90 bg-teal-400/10 px-2 py-1 rounded border border-teal-400/20 font-medium whitespace-nowrap" title="Automatic checkout and logout at 6:00 PM">
+                Auto 6:00 PM
+              </span>
+            )}
           </>
         )}
       </div>

@@ -2,9 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Camera, X, CheckCircle2, AlertCircle, Loader2, User, Scan, RefreshCw } from 'lucide-react';
 import api from '../utils/api';
-
-const MODEL_URL = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-const FACEAPI_CDN = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+import { ensureModels } from '../utils/faceApi';
 
 const FaceRegister = ({ userId, userName, onClose, onSuccess }) => {
   const videoRef  = useRef(null);
@@ -20,26 +18,10 @@ const FaceRegister = ({ userId, userName, onClose, onSuccess }) => {
     return () => stopCamera();
   }, []);
 
-  const loadScript = (src) => new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
-  });
-
   const initFaceAPI = async () => {
     try {
-      if (!window.faceapi) {
-        setMessage('Loading face-api.js library (first time may take ~10s)...');
-        await loadScript(FACEAPI_CDN);
-      }
-      const faceapi = window.faceapi;
-      setMessage('Loading recognition models...');
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-      ]);
+      setMessage('Loading face recognition models...');
+      await ensureModels();
       setMessage('Starting camera...');
       const stream = await navigator.mediaDevices.getUserMedia({
         video: { width: 640, height: 480, facingMode: 'user' }
@@ -71,7 +53,7 @@ const FaceRegister = ({ userId, userName, onClose, onSuccess }) => {
     setMessage('Detecting face — please hold still...');
     drawCanvas();
     try {
-      const faceapi = window.faceapi;
+      const faceapi = await ensureModels();
       const options = new faceapi.TinyFaceDetectorOptions({ inputSize: 320, scoreThreshold: 0.5 });
       const result = await faceapi
         .detectSingleFace(videoRef.current, options)

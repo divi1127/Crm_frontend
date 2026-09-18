@@ -5,9 +5,7 @@ import {
   Scan, UserCheck, RefreshCw, ShieldCheck
 } from 'lucide-react';
 import api from '../utils/api';
-
-const MODEL_URL    = 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@0.22.2/weights';
-const FACEAPI_CDN  = 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js';
+import { ensureModels } from '../utils/faceApi';
 
 /* ───── Euclidean distance ───── */
 const euclideanDist = (a, b) => {
@@ -39,29 +37,11 @@ const FaceCheckIn = ({ onSuccess, onClose }) => {
     };
   }, []);
 
-  /* ── load script helper ── */
-  const loadScript = (src) => new Promise((resolve, reject) => {
-    if (document.querySelector(`script[src="${src}"]`)) { resolve(); return; }
-    const s = document.createElement('script');
-    s.src = src; s.onload = resolve; s.onerror = reject;
-    document.head.appendChild(s);
-  });
-
   /* ── main initialiser ── */
   const initAll = async () => {
     try {
-      if (!window.faceapi) {
-        setMessage('Loading face-api.js (first run ~10 s)...');
-        await loadScript(FACEAPI_CDN);
-      }
-      const faceapi = window.faceapi;
-
-      setMessage('Loading recognition models...');
-      await Promise.all([
-        faceapi.nets.tinyFaceDetector.loadFromUri(MODEL_URL),
-        faceapi.nets.faceLandmark68TinyNet.loadFromUri(MODEL_URL),
-        faceapi.nets.faceRecognitionNet.loadFromUri(MODEL_URL),
-      ]);
+      setMessage('Loading face recognition models...');
+      const faceapi = await ensureModels();
 
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
       if (!userInfo || !userInfo.token) {

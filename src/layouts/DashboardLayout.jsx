@@ -6,7 +6,7 @@ import Navbar from '../components/Navbar';
 import api from '../utils/api';
 
 const AUTO_LOGOUT_HOUR = 18;
-const AUTO_LOGOUT_MINUTE = 30;
+const AUTO_LOGOUT_MINUTE = 0; // 6:00 PM IST
 
 const getIST = () => {
   const now = new Date();
@@ -33,34 +33,46 @@ const DashboardLayout = () => {
     navigate('/login');
   }, [navigate]);
 
-  // Auto-logout timer for 6:30 PM IST
+  // Auto-logout timer for 6:00 PM IST (Developer, Marketing, and non-admin employees)
   useEffect(() => {
     const userInfo = JSON.parse(localStorage.getItem('userInfo'));
     if (!userInfo) return;
     if (['Admin', 'HR', 'MD'].includes(userInfo.role)) return;
 
-    const calcMsUntil = (targetHour, targetMin) => {
-      const ist = getIST();
-      const target = new Date(ist);
-      target.setHours(targetHour, targetMin, 0, 0);
-      let diff = target.getTime() - ist.getTime();
-      if (diff <= 0) {
-        diff += 24 * 60 * 60 * 1000;
-      }
-      return diff;
-    };
+    const ist = getIST();
+    const currentHours = ist.getHours();
+    const currentMinutes = ist.getMinutes();
+    const currentTotalMin = currentHours * 60 + currentMinutes;
+    const targetTotalMin = AUTO_LOGOUT_HOUR * 60 + AUTO_LOGOUT_MINUTE; // 18:00 = 1080 min
 
-    const msUntilLogout = calcMsUntil(AUTO_LOGOUT_HOUR, AUTO_LOGOUT_MINUTE);
+    // If currently at or past 6:00 PM today in the evening:
+    if (currentTotalMin >= targetTotalMin) {
+      setToast('Work hours ended at 6:00 PM. Automatic checkout & logout in progress...');
+      const immediateTimer = setTimeout(() => {
+        doAutoLogout();
+      }, 2500);
+      return () => clearTimeout(immediateTimer);
+    }
+
+    // Calculate ms until 18:00 today
+    const targetDate = new Date(ist);
+    targetDate.setHours(AUTO_LOGOUT_HOUR, AUTO_LOGOUT_MINUTE, 0, 0);
+    const msUntilLogout = targetDate.getTime() - ist.getTime();
+
     const logoutTimer = setTimeout(doAutoLogout, msUntilLogout);
 
-    const msUntilWarning = calcMsUntil(AUTO_LOGOUT_HOUR, AUTO_LOGOUT_MINUTE - 5);
-    const warningTimer = setTimeout(() => {
-      setToast('Session ends at 6:30 PM. Please save your work.');
-    }, msUntilWarning);
+    // Warning 5 minutes before (at 5:55 PM IST)
+    const msUntilWarning = msUntilLogout - (5 * 60 * 1000);
+    let warningTimer;
+    if (msUntilWarning > 0) {
+      warningTimer = setTimeout(() => {
+        setToast('Session ends at 6:00 PM. Automatic checkout & logout in 5 minutes. Please save your work.');
+      }, msUntilWarning);
+    }
 
     return () => {
       clearTimeout(logoutTimer);
-      clearTimeout(warningTimer);
+      if (warningTimer) clearTimeout(warningTimer);
     };
   }, [doAutoLogout]);
 

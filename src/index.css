@@ -138,3 +138,32 @@
 :root.light aside .text-teal-400 {
   color: #14B8A6 !important;
 }
+
+/* Login page overrides in light mode */
+:root.light .login-page-hero,
+:root.light .login-page-hero * {
+  color: #FFFFFF;
+}
+:root.light .login-page-hero .text-violet-400 {
+  color: #a78bfa !important;
+}
+:root.light .login-page-hero .text-slate-400 {
+  color: #cbd5e1 !important;
+}
+
+/* Ensure colored buttons with gradient retain crisp white text in light mode */
+:root.light .btn-gradient-text,
+:root.light button.bg-gradient-to-r,
+:root.light button.bg-gradient-to-r * {
+  color: #FFFFFF !important;
+}
+
+/* Ensure login input text is 100% visible and high contrast in light mode */
+:root.light .login-input-field {
+  background-color: #FFFFFF !important;
+  color: #0F172A !important;
+  border-color: #CBD5E1 !important;
+}
+:root.light .login-input-field::placeholder {
+  color: #64748B !important;
+}

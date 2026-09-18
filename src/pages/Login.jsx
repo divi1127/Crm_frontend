@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ChevronRight } from 'lucide-react';
+import { Eye, EyeOff, ChevronRight, Sun, Moon } from 'lucide-react';
 import { useNavigate, Link } from 'react-router-dom';
 import api from '../utils/api';
 import FaceLoginVerify from '../components/FaceLoginVerify';
@@ -30,6 +30,7 @@ const slides = [
 ];
 
 const Login = () => {
+  const [theme, setTheme] = useState(() => localStorage.getItem('theme') || 'dark');
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -40,6 +41,19 @@ const Login = () => {
   const [activeTab, setActiveTab] = useState('Admin');
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light');
+    } else {
+      document.documentElement.classList.remove('light');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
+  };
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -73,10 +87,12 @@ const Login = () => {
   };
 
   return (
-    <div className="min-h-screen flex bg-[#03060b] font-sans selection:bg-violet-500/30 selection:text-violet-200 overflow-hidden">
+    <div className={`min-h-screen flex font-sans selection:bg-violet-500/30 selection:text-violet-200 overflow-hidden transition-colors duration-300 ${
+      theme === 'light' ? 'bg-[#F1F5F9]' : 'bg-[#03060b]'
+    }`}>
       
       {/* ── Left Hero Panel (Cinematic Tech Section with Carousel) ── */}
-      <div className="hidden lg:flex w-[50%] relative overflow-hidden p-16 flex-col">
+      <div className="login-page-hero hidden lg:flex w-[50%] relative overflow-hidden p-16 flex-col">
         {/* Carousel Background Images */}
         <AnimatePresence mode="wait">
           <motion.div 
@@ -138,7 +154,7 @@ const Login = () => {
                 ))},<br />
                 <span className="text-white">Secure Future.</span>
               </h2>
-              <p className="text-slate-400 text-lg mb-10 font-medium leading-relaxed max-w-lg">
+              <p className="text-slate-300 text-lg mb-10 font-medium leading-relaxed max-w-lg">
                 {slides[currentSlide].description}
               </p>
             </motion.div>
@@ -162,11 +178,33 @@ const Login = () => {
       </div>
 
       {/* ── Right Form Panel (Premium Minimalist Section) ── */}
-      <div className="flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 relative overflow-hidden bg-[#03060b]">
+      <div className={`flex-1 flex flex-col justify-center items-center p-6 sm:p-12 lg:p-24 relative overflow-hidden transition-colors duration-300 ${
+        theme === 'light' ? 'bg-[#F8FAFC]' : 'bg-[#03060b]'
+      }`}>
         {/* Dynamic Background Glows */}
         <div className="absolute top-0 right-0 w-full h-full overflow-hidden pointer-events-none">
-          <div className="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-violet-600/5 blur-[150px] rounded-full animate-pulse" />
-          <div className="absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] bg-indigo-600/5 blur-[120px] rounded-full" />
+          <div className={`absolute top-[-10%] right-[-10%] w-[500px] h-[500px] blur-[150px] rounded-full animate-pulse ${
+            theme === 'light' ? 'bg-violet-500/10' : 'bg-violet-600/5'
+          }`} />
+          <div className={`absolute bottom-[-10%] left-[-10%] w-[400px] h-[400px] blur-[120px] rounded-full ${
+            theme === 'light' ? 'bg-indigo-500/10' : 'bg-indigo-600/5'
+          }`} />
+        </div>
+
+        {/* Top-Right Theme Toggle */}
+        <div className="absolute top-6 right-6 z-20">
+          <button
+            type="button"
+            onClick={toggleTheme}
+            className={`p-2.5 rounded-xl border transition-all ${
+              theme === 'light'
+                ? 'bg-white border-slate-200 text-slate-700 hover:bg-slate-100 shadow-xs'
+                : 'bg-white/5 border-white/10 text-slate-300 hover:bg-white/10 hover:text-white'
+            }`}
+            title={theme === 'dark' ? "Switch to Light Mode" : "Switch to Dark Mode"}
+          >
+            {theme === 'dark' ? <Sun className="w-5 h-5 text-yellow-400" /> : <Moon className="w-5 h-5 text-violet-600" />}
+          </button>
         </div>
         
         <motion.div 
@@ -176,18 +214,30 @@ const Login = () => {
           className="w-full max-w-[400px] relative z-10"
         >
           <header className="mb-10 text-center">
-            <h1 className="text-4xl font-bold text-white tracking-tight mb-4">Account Login</h1>
-            <p className="text-slate-500 text-sm font-medium">
+            <h1 className={`text-4xl font-bold tracking-tight mb-4 ${
+              theme === 'light' ? 'text-slate-900' : 'text-white'
+            }`}>
+              Account Login
+            </h1>
+            <p className={`text-sm font-medium ${
+              theme === 'light' ? 'text-slate-500' : 'text-slate-400'
+            }`}>
               Enterprise access for authorized personnel only.
             </p>
           </header>
 
           {/* Quick Access Toggles (Admin Only) */}
-          <div className="mb-10 p-1.5 bg-white/5 rounded-2xl border border-white/5 w-full">
+          <div className={`mb-10 p-1.5 rounded-2xl border w-full ${
+            theme === 'light' ? 'bg-slate-100 border-slate-200' : 'bg-white/5 border-white/5'
+          }`}>
             <button
               type="button"
               onClick={() => { setEmail('admin@crm.io'); setPassword('password123'); setActiveTab('Admin'); }}
-              className="w-full py-2 rounded-[12px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 bg-violet-600/20 text-violet-400 border border-violet-500/20 shadow-inner"
+              className={`w-full py-2 rounded-[12px] text-[10px] font-bold uppercase tracking-wider transition-all duration-300 ${
+                theme === 'light'
+                  ? 'bg-violet-600 text-white shadow-xs hover:bg-violet-700'
+                  : 'bg-violet-600/20 text-violet-400 border border-violet-500/20 shadow-inner'
+              }`}
             >
               Admin
             </button>
@@ -197,7 +247,11 @@ const Login = () => {
             <motion.div 
               initial={{ scale: 0.95, opacity: 0 }} 
               animate={{ scale: 1, opacity: 1 }}
-              className="mb-8 p-4 rounded-2xl bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-bold text-center backdrop-blur-sm"
+              className={`mb-8 p-4 rounded-2xl text-xs font-bold text-center backdrop-blur-sm border ${
+                theme === 'light'
+                  ? 'bg-red-50 border-red-200 text-red-600'
+                  : 'bg-red-500/10 border-red-500/20 text-red-400'
+              }`}
             >
               {error}
             </motion.div>
@@ -206,22 +260,39 @@ const Login = () => {
           <form onSubmit={handleLogin} className="space-y-5">
             <div className="relative group">
               <input 
-                type="text" required value={email} onChange={(e) => setEmail(e.target.value)}
+                type="text" 
+                required 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)}
                 placeholder="Email or Username" 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-slate-700 focus:outline-none focus:border-violet-500/40 focus:bg-white/[0.06] transition-all text-sm"
+                className={`login-input-field w-full px-5 py-4 rounded-2xl text-sm transition-all outline-none ${
+                  theme === 'light'
+                    ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 shadow-xs'
+                    : 'bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:border-violet-500/40 focus:bg-white/[0.06]'
+                }`}
               />
             </div>
 
             <div className="relative group">
               <input 
-                type={showPassword ? "text" : "password"} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)}
+                type={showPassword ? "text" : "password"} 
+                required 
+                minLength={6} 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)}
                 placeholder="Password (min 6 characters)" 
-                className="w-full px-5 py-4 bg-white/[0.03] border border-white/5 rounded-2xl text-white placeholder-slate-700 focus:outline-none focus:border-violet-500/40 focus:bg-white/[0.06] transition-all text-sm"
+                className={`login-input-field w-full px-5 py-4 rounded-2xl text-sm transition-all outline-none ${
+                  theme === 'light'
+                    ? 'bg-white border border-slate-300 text-slate-900 placeholder-slate-400 focus:border-violet-600 focus:ring-2 focus:ring-violet-500/20 shadow-xs'
+                    : 'bg-white/[0.03] border border-white/10 text-white placeholder-slate-500 focus:border-violet-500/40 focus:bg-white/[0.06]'
+                }`}
               />
               <button 
                 type="button" 
                 onClick={() => setShowPassword(!showPassword)} 
-                className="absolute right-4 top-1/2 -translate-y-1/2 text-slate-700 hover:text-white p-2 transition-colors"
+                className={`absolute right-4 top-1/2 -translate-y-1/2 p-2 transition-colors ${
+                  theme === 'light' ? 'text-slate-400 hover:text-slate-700' : 'text-slate-500 hover:text-white'
+                }`}
               >
                 {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
@@ -229,15 +300,33 @@ const Login = () => {
 
             <div className="flex items-center justify-between py-2">
               <div className="flex items-center gap-3">
-                <input type="checkbox" id="remember" className="w-4 h-4 rounded-lg bg-white/5 border-white/10 text-violet-600 focus:ring-violet-500/30" />
-                <label htmlFor="remember" className="text-xs text-slate-500 font-medium cursor-pointer">Remember device</label>
+                <input 
+                  type="checkbox" 
+                  id="remember" 
+                  className={`w-4 h-4 rounded-lg text-violet-600 focus:ring-violet-500/30 ${
+                    theme === 'light' ? 'border-slate-300 bg-white' : 'bg-white/5 border-white/10'
+                  }`} 
+                />
+                <label htmlFor="remember" className={`text-xs font-medium cursor-pointer ${
+                  theme === 'light' ? 'text-slate-600' : 'text-slate-400'
+                }`}>
+                  Remember device
+                </label>
               </div>
-              <Link to="/forgot-password" title="Recover your account" className="text-xs text-violet-400 font-bold hover:text-violet-300 transition-colors">Recovery Key?</Link>
+              <Link 
+                to="/forgot-password" 
+                title="Recover your account" 
+                className={`text-xs font-bold transition-colors ${
+                  theme === 'light' ? 'text-violet-600 hover:text-violet-700' : 'text-violet-400 hover:text-violet-300'
+                }`}
+              >
+                Recovery Key?
+              </Link>
             </div>
 
             <button 
               disabled={loading}
-              className="w-full py-4 mt-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-[13px] rounded-2xl shadow-2xl shadow-violet-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
+              className="btn-gradient-text w-full py-4 mt-4 bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-500 hover:to-indigo-500 text-white font-bold text-[13px] rounded-2xl shadow-xl shadow-violet-600/20 active:scale-[0.98] transition-all flex items-center justify-center gap-3 disabled:opacity-50"
             >
               {loading ? (
                 <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin" />
@@ -247,9 +336,15 @@ const Login = () => {
             </button>
           </form>
 
-          <footer className="mt-12 pt-8 border-t border-white/5">
-            <p className="text-[10px] text-slate-600 text-center uppercase tracking-widest font-bold">
-              © 2026 JOD TECH • <a href="https://www.jodtech.in/" target="_blank" rel="noopener noreferrer" className="text-violet-400/80 hover:text-violet-400 hover:underline transition-all">https://www.jodtech.in/</a>
+          <footer className={`mt-12 pt-8 border-t ${
+            theme === 'light' ? 'border-slate-200' : 'border-white/5'
+          }`}>
+            <p className={`text-[10px] text-center uppercase tracking-widest font-bold ${
+              theme === 'light' ? 'text-slate-500' : 'text-slate-500'
+            }`}>
+              © 2026 JOD TECH • <a href="https://www.jodtech.in/" target="_blank" rel="noopener noreferrer" className={`hover:underline transition-all ${
+                theme === 'light' ? 'text-violet-600' : 'text-violet-400/80 hover:text-violet-400'
+              }`}>https://www.jodtech.in/</a>
             </p>
           </footer>
         </motion.div>
