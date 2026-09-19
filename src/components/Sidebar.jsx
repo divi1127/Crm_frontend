@@ -127,6 +127,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
   };
 
   return (
+    <>
     <div 
       className={`fixed md:relative z-40 flex flex-col h-full bg-[var(--color-secondary-bg)] border-r border-[var(--color-border)] transition-all duration-300 ${
         isOpen ? 'translate-x-0 w-64' : '-translate-x-full md:translate-x-0 md:w-16 w-0 overflow-hidden'
@@ -272,6 +273,7 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
         </div>
       </div>
     )}
+    </>
   );
 };
 
