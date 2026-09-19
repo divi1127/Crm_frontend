@@ -88,20 +88,25 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
     : user.role === 'Employee' ? employeeNavItems
     : developerNavItems;
 
-  const handleLogout = async () => {
-    if (user.role === 'Developer' || user.role === 'Marketing') {
-      alert('Manual logout is disabled for Developer and Marketing roles. Automatic checkout & logout occurs at 6:00 PM.');
-      return;
-    }
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
+
+  const isNonAdminEmployee = !['Admin', 'HR', 'MD'].includes(user.role);
+
+  const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = async () => {
+    setShowLogoutConfirm(false);
     try {
-      // Auto checkout on logout for non-admin employees
+      // Auto checkout on manual logout for non-admin employees (silently — may already be checked in or not)
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.role !== 'Admin') {
+      if (userInfo && !['Admin', 'HR', 'MD'].includes(userInfo.role)) {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await api.post('/api/attendances/checkout', {}, config);
       }
     } catch (_) {
-      // If no check-in exists today or any other error — just proceed with logout silently
+      // No check-in exists today or an error occurred — proceed with logout silently
     } finally {
       localStorage.removeItem('userInfo');
       navigate('/login');
@@ -202,19 +207,71 @@ const Sidebar = ({ isOpen, setIsOpen }) => {
               <p className="text-sm font-medium text-white truncate">{user.name}</p>
               <p className="text-xs text-[var(--color-text-secondary)] truncate">{user.role}</p>
             </div>
-            {!(user.role === 'Developer' || user.role === 'Marketing') ? (
-              <button onClick={handleLogout} title="Logout" className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors flex-shrink-0">
+            <div className="flex items-center gap-1.5 flex-shrink-0">
+              {isNonAdminEmployee && (
+                <span
+                  className="text-[10px] text-teal-400/90 bg-teal-400/10 px-1.5 py-0.5 rounded border border-teal-400/20 font-medium whitespace-nowrap"
+                  title="Primary daily auto-checkout & auto-logout at 6:00 PM IST"
+                >
+                  Auto 6PM
+                </span>
+              )}
+              <button
+                onClick={handleLogout}
+                title="Logout"
+                className="p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors"
+              >
                 <LogOut className="w-4 h-4" />
               </button>
-            ) : (
-              <span className="text-[10px] text-teal-400/90 bg-teal-400/10 px-2 py-1 rounded border border-teal-400/20 font-medium whitespace-nowrap" title="Automatic checkout and logout at 6:00 PM">
-                Auto 6:00 PM
-              </span>
-            )}
+            </div>
           </>
+        )}
+        {/* Collapsed state: show only logout icon */}
+        {!isOpen && (
+          <button
+            onClick={handleLogout}
+            title="Logout"
+            className="mx-auto p-2 rounded-lg text-[var(--color-text-secondary)] hover:bg-white/5 hover:text-red-400 transition-colors"
+          >
+            <LogOut className="w-4 h-4" />
+          </button>
         )}
       </div>
     </div>
+
+    {/* Logout Confirmation Modal */}
+    {showLogoutConfirm && (
+      <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+        <div className="bg-[var(--color-secondary-bg)] border border-[var(--color-border)] rounded-2xl shadow-2xl p-6 w-full max-w-sm">
+          <h2 className="text-base font-bold text-white mb-2">Confirm Logout</h2>
+          <p className="text-sm text-[var(--color-text-secondary)] mb-3">
+            Are you sure you want to log out?
+          </p>
+          {isNonAdminEmployee && (
+            <div className="text-xs text-teal-400 bg-teal-400/10 border border-teal-400/20 rounded-lg px-3 py-2 mb-4 leading-relaxed">
+              ℹ️ The primary daily auto-checkout &amp; auto-logout occurs at{' '}
+              <strong>6:00 PM IST</strong>. After that time, you cannot log in again until the
+              next morning (6:00 AM IST).
+            </div>
+          )}
+          {!isNonAdminEmployee && <div className="mb-2" />}
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowLogoutConfirm(false)}
+              className="flex-1 py-2.5 rounded-xl border border-[var(--color-border)] text-sm text-[var(--color-text-secondary)] hover:text-white hover:border-white/30 transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              onClick={confirmLogout}
+              className="flex-1 py-2.5 rounded-xl bg-red-500/90 hover:bg-red-500 text-white text-sm font-semibold transition-colors"
+            >
+              Log Out
+            </button>
+          </div>
+        </div>
+      </div>
+    )}
   );
 };
 

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Eye, EyeOff, ChevronRight, Sun, Moon } from 'lucide-react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Eye, EyeOff, ChevronRight, Sun, Moon, Lock } from 'lucide-react';
+import { useNavigate, useLocation, Link } from 'react-router-dom';
 import api from '../utils/api';
 import FaceLoginVerify from '../components/FaceLoginVerify';
 import jodLogo from '../assets/jod.jpeg';
@@ -35,12 +35,27 @@ const Login = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
+  const [isAfterHoursError, setIsAfterHoursError] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showFaceLogin, setShowFaceLogin] = useState(false);
   const [pendingUser, setPendingUser] = useState(null);
   const [activeTab, setActiveTab] = useState('Admin');
   const [currentSlide, setCurrentSlide] = useState(0);
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Detect auto_logout_6pm redirect and show a lockout message
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    if (params.get('reason') === 'auto_logout_6pm') {
+      setIsAfterHoursError(true);
+      setError(
+        'Your session was automatically ended at 6:00 PM IST. Employee login is locked until tomorrow morning (6:00 AM IST).'
+      );
+      // Clean up URL without re-rendering
+      window.history.replaceState({}, '', '/login');
+    }
+  }, [location.search]);
 
   useEffect(() => {
     if (theme === 'light') {
@@ -65,6 +80,7 @@ const Login = () => {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError('');
+    setIsAfterHoursError(false);
     if (password.length < 6) {
       setError('Password must be at least 6 characters.');
       return;
@@ -80,7 +96,12 @@ const Login = () => {
       setPendingUser(data);
       setShowFaceLogin(true);
     } catch (err) {
-      setError(err.response?.data?.message || 'Failed to login');
+      const code = err.response?.data?.code;
+      const message = err.response?.data?.message || 'Failed to login';
+      if (code === 'AFTER_HOURS_LOCK') {
+        setIsAfterHoursError(true);
+      }
+      setError(message);
     } finally {
       setLoading(false);
     }
@@ -244,16 +265,26 @@ const Login = () => {
           </div>
 
           {error && (
-            <motion.div 
-              initial={{ scale: 0.95, opacity: 0 }} 
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
-              className={`mb-8 p-4 rounded-2xl text-xs font-bold text-center backdrop-blur-sm border ${
-                theme === 'light'
-                  ? 'bg-red-50 border-red-200 text-red-600'
-                  : 'bg-red-500/10 border-red-500/20 text-red-400'
+              className={`mb-8 p-4 rounded-2xl text-xs font-medium backdrop-blur-sm border ${
+                isAfterHoursError
+                  ? theme === 'light'
+                    ? 'bg-amber-50 border-amber-300 text-amber-700'
+                    : 'bg-amber-500/10 border-amber-500/30 text-amber-400'
+                  : theme === 'light'
+                    ? 'bg-red-50 border-red-200 text-red-600'
+                    : 'bg-red-500/10 border-red-500/20 text-red-400'
               }`}
             >
-              {error}
+              {isAfterHoursError && (
+                <div className="flex items-center gap-2 mb-1.5">
+                  <Lock className="w-3.5 h-3.5 flex-shrink-0" />
+                  <span className="font-bold">Access Locked — Outside Work Hours</span>
+                </div>
+              )}
+              <p className={isAfterHoursError ? 'font-normal leading-relaxed' : 'font-bold text-center'}>{error}</p>
             </motion.div>
           )}
 

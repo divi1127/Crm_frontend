@@ -22,7 +22,7 @@ const DashboardLayout = () => {
   const doAutoLogout = useCallback(async () => {
     try {
       const userInfo = JSON.parse(localStorage.getItem('userInfo'));
-      if (userInfo && userInfo.role !== 'Admin' && userInfo.role !== 'HR' && userInfo.role !== 'MD') {
+      if (userInfo && !['Admin', 'HR', 'MD'].includes(userInfo.role)) {
         const config = { headers: { Authorization: `Bearer ${userInfo.token}` } };
         await api.post('/api/attendances/checkout', {}, config);
       }
@@ -30,7 +30,7 @@ const DashboardLayout = () => {
       // No check-in exists today or an error occurred — proceed with logout
     }
     localStorage.removeItem('userInfo');
-    navigate('/login');
+    navigate('/login?reason=auto_logout_6pm');
   }, [navigate]);
 
   // Auto-logout timer for 6:00 PM IST (Developer, Marketing, and non-admin employees)
@@ -45,7 +45,7 @@ const DashboardLayout = () => {
     const currentTotalMin = currentHours * 60 + currentMinutes;
     const targetTotalMin = AUTO_LOGOUT_HOUR * 60 + AUTO_LOGOUT_MINUTE; // 18:00 = 1080 min
 
-    // If currently at or past 6:00 PM today in the evening:
+    // If currently at or past 6:00 PM — log out immediately (page opened after work hours)
     if (currentTotalMin >= targetTotalMin) {
       setToast('Work hours ended at 6:00 PM. Automatic checkout & logout in progress...');
       const immediateTimer = setTimeout(() => {
